@@ -1,0 +1,23 @@
+Error: Error converting data type nvarchar to bigint. | StackTrace:    at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, SqlCommand command, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.Read()
+   at System.Data.Common.DataAdapter.FillLoadDataRow(SchemaMapping mapping)
+   at System.Data.Common.DataAdapter.FillFromReader(DataSet dataset, DataTable datatable, String srcTable, DataReaderContainer dataReader, Int32 startRecord, Int32 maxRecords, DataColumn parentChapterColumn, Object parentChapterValue)
+   at System.Data.Common.DataAdapter.Fill(DataSet dataSet, String srcTable, IDataReader dataReader, Int32 startRecord, Int32 maxRecords)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataSet dataSet, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataSet dataSet)
+   at Student.Repository.SQL.SQLHelperCore.<>c__DisplayClass18_1.<ExecuteDatasetAsync>b__0() in D:\bismafilre\SchoolApiCore\Student\Repository\SQL\SQLHelperCore.cs:line 252
+   at System.Threading.Tasks.Task`1.InnerInvoke()
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Student.Repository.SQL.SQLHelperCore.ExecuteDatasetAsync(SqlConnection connection, CommandType commandType, String commandText, SqlParameter[] commandParameters) in D:\bismafilre\SchoolApiCore\Student\Repository\SQL\SQLHelperCore.cs:line 252
+   at Student.Repository.SQL.SQLHelperCore.ExecuteDatasetAsync(String connectionString, CommandType commandType, String commandText, SqlParameter[] commandParameters) in D:\bismafilre\SchoolApiCore\Student\Repository\SQL\SQLHelperCore.cs:line 235
+   at Student.Services.Students.StudentService.AddStudent(AddStudentRequestDTO request, String clientId) in D:\bismafilre\SchoolApiCore\Student\Services\Students\StudentService.cs:line 109 | Request: {"AdmissionNo":"string","StudentName":"string","DOB":"2025-07-03T05:18:39.088Z","BOA":"2025-07-03T05:18:39.088Z","Gender":"string","FatherName":"string","FatherQualification":"string","FatherOccupation":"string","MontherName":"string","MotherQualification":"string","MotherOccupation":"string","PresentAddress":"string","UID":"string","PermanentAddress":"string","Session":"string","MobileFather":"string","MobileMother":"string","LandLineNo":"string","SEmail":"string","Aadhaar":"string","DistrictID":"string","StudentCatID":"string","GuardianName":"string","GuardianPhoneNo":"string","GuardialAccupation":"string","GuardianQualification":"string","PinNo":"string","StudentCatName":"string","DistrictName":"string","deptmentid":0,"classid":"string","sectionid":"string","rollno":"string","remarks":"string","BusStopID":0,"RouteID":0,"PhotoPath":"string","AcademicNo":"string","GPSLocation":"string"}

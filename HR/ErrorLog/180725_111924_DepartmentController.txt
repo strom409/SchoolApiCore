@@ -1,0 +1,2 @@
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at HR.Services.Deparments.DepartmentsController.DeleteDepartment(Int32 actionType, Int64 id) in D:\bismafilre\SchoolApiCore\HR\Services\Departments\DepartmentsController.cs:line 176

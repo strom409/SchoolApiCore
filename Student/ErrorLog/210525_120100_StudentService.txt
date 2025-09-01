@@ -1,0 +1,3 @@
+Value was either too large or too small for an Int32. |    at System.Number.ThrowOverflowException[TInteger]()
+   at System.Int32.Parse(String s)
+   at Student.Services.Students.StudentService.GetNextAdmissionNoAsync() in D:\bismafilre\SchoolApiCore\Student\Services\Students\StudentService.cs:line 1303

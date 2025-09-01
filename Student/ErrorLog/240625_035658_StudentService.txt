@@ -1,0 +1,2 @@
+Value cannot be null. (Parameter 'connectionString') |    at Student.Repository.SQL.SQLHelperCore.ExecuteDatasetAsync(String connectionString, CommandType commandType, String commandText, SqlParameter[] commandParameters) in D:\bismafilre\SchoolApiCore\Student\Repository\SQL\SQLHelperCore.cs:line 230
+   at Student.Services.Students.StudentService.GetNextAdmissionNoAsync() in D:\bismafilre\SchoolApiCore\Student\Services\Students\StudentService.cs:line 2999

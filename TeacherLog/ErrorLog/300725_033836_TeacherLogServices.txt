@@ -1,0 +1,11 @@
+Format of the initialization string does not conform to specification starting at index 0. |    at Microsoft.Data.Common.ConnectionString.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at Microsoft.Data.Common.ConnectionString.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at Microsoft.Data.Common.ConnectionString.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms)
+   at Microsoft.Data.SqlClient.SqlConnectionString..ctor(String connectionString)
+   at Microsoft.Data.SqlClient.SqlConnectionFactory.CreateConnectionOptions(String connectionString, DbConnectionOptions previous)
+   at Microsoft.Data.ProviderBase.DbConnectionFactory.GetConnectionPoolGroup(DbConnectionPoolKey key, DbConnectionPoolGroupOptions poolOptions, DbConnectionOptions& userConnectionOptions)
+   at Microsoft.Data.SqlClient.SqlConnection.ConnectionString_Set(DbConnectionPoolKey key)
+   at Microsoft.Data.SqlClient.SqlConnection.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnection..ctor(String connectionString)
+   at TeacherLog.Repository.SQL.SQLHelperCore.ExecuteDatasetAsync(String connectionString, CommandType commandType, String commandText, SqlParameter[] commandParameters) in D:\bismafilre\SchoolApiCore\TeacherLog\Repository\SQL\SQLHelperCore.cs:line 232
+   at TeacherLog.Services.TeacherLogServices.AddTeacherLogDataOnSectionIDandDate(TeacherLogData td, String clientId) in D:\bismafilre\SchoolApiCore\TeacherLog\Services\TeacherLogServices.cs:line 52

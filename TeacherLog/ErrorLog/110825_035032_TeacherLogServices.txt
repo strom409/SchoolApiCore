@@ -1,0 +1,3 @@
+Column 'PresentNow' does not belong to table Table. |    at System.Data.DataRow.GetDataColumn(String columnName)
+   at System.Data.DataRow.get_Item(String columnName)
+   at TeacherLog.Services.TeacherLogServices.GetTeacherLogDataOnSectionIDandDate(String sectionIdAndDate, String clientId)

@@ -1,0 +1,4 @@
+System.FormatException: The input string '2024-25' was not in a correct format.
+   at System.Number.ThrowFormatException[TChar](ReadOnlySpan`1 value)
+   at System.Convert.ToInt32(String value)
+   at ClassTest.Services.Subject.SubjectService.InsertNewSubject(SubjectDTO subname, String clientId) in D:\bismafilre\SchoolApiCore\ClassTest\Services\Subject\SubjectService.cs:line 69

@@ -1,0 +1,4 @@
+System.ArgumentException: Column 'ClassName' does not belong to table Table.
+   at System.Data.DataRow.GetDataColumn(String columnName)
+   at System.Data.DataRow.get_Item(String columnName)
+   at Student.Services.ClassMaster.ClassMasterService.UpgradeClassSubjectsSectionsAsync(String currentSession, String newSession, String clientId) in D:\bismafilre\SchoolApiCore\Student\Services\ClassMaster\ClassMasterService.cs:line 651

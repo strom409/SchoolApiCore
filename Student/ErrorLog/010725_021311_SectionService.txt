@@ -1,0 +1,3 @@
+System.InvalidCastException: Object cannot be cast from DBNull to other types.
+   at System.DBNull.System.IConvertible.ToInt32(IFormatProvider provider)
+   at Student.Services.ClassMaster.ClassMasterService.GetSectionsByClassId(Int32 classId, String clientId) in D:\bismafilre\SchoolApiCore\Student\Services\ClassMaster\ClassMasterService.cs:line 136

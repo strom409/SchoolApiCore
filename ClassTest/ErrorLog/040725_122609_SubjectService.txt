@@ -1,0 +1,7 @@
+System.ArgumentException: The SqlParameter is already contained by another SqlParameterCollection.
+   at Microsoft.Data.SqlClient.SqlParameterCollection.Validate(Int32 index, Object value)
+   at Microsoft.Data.SqlClient.SqlParameterCollection.AddRange(Array values)
+   at Microsoft.Data.SqlClient.SqlParameterCollection.AddRange(SqlParameter[] values)
+   at ClassTest.Repository.SQL.SQLHelperCore.ExecuteDatasetAsync(SqlConnection connection, CommandType commandType, String commandText, SqlParameter[] commandParameters) in D:\bismafilre\SchoolApiCore\ClassTest\Repository\SQL\SQLHelperCore.cs:line 247
+   at ClassTest.Repository.SQL.SQLHelperCore.ExecuteDatasetAsync(String connectionString, CommandType commandType, String commandText, SqlParameter[] commandParameters) in D:\bismafilre\SchoolApiCore\ClassTest\Repository\SQL\SQLHelperCore.cs:line 235
+   at ClassTest.Services.Subject.SubjectService.DeleteSubject(String subjectId, String clientId) in D:\bismafilre\SchoolApiCore\ClassTest\Services\Subject\SubjectService.cs:line 882

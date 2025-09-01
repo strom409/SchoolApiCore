@@ -1,0 +1,2 @@
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at HR.Services.Deparments.DepartmentsController.GetDepartmentData(Int32 actionType, String param) in D:\bismafilre\SchoolApiCore\HR\Services\Departments\DepartmentsController.cs:line 128

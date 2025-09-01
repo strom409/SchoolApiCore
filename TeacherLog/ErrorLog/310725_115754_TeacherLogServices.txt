@@ -1,3 +1,0 @@
-Column 'LogId' does not belong to table Table. |    at System.Data.DataRow.GetDataColumn(String columnName)
-   at System.Data.DataRow.get_Item(String columnName)
-   at TeacherLog.Services.TeacherLogServices.GetTeacherLogDataOnECodeandDate(String eCodeAndDate, String clientId) in D:\bismafilre\SchoolApiCore\TeacherLog\Services\TeacherLogServices.cs:line 514

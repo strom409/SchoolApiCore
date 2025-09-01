@@ -1,2 +1,0 @@
-Error: Value cannot be null. (Parameter 'spName') | StackTrace:    at Student.Repository.SQL.SQLHelperCore.ExecuteDatasetAsync(String connectionString, String spName, Object[] parameterValues) in D:\bismafilre\SchoolApiCore\Student\Repository\SQL\SQLHelperCore.cs:line 261
-   at Student.Services.User.LoginServices.LoginAsync(LoginDto request) in D:\bismafilre\SchoolApiCore\Student\Services\User\LoginServices.cs:line 49 | Request: {"UserName":"nitsjk","UserPassword":"admin123#","ClientId":"Client1"}

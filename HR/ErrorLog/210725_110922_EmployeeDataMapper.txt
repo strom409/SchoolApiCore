@@ -1,3 +1,0 @@
-System.InvalidCastException: Object cannot be cast from DBNull to other types.
-   at System.DBNull.System.IConvertible.ToInt64(IFormatProvider provider)
-   at HR.Services.EmployeeService.EmpData(DataSet ds, String clientId) in D:\bismafilre\SchoolApiCore\HR\Services\EmployeeService.cs:line 2458

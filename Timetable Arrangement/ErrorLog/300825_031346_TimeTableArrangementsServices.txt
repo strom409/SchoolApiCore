@@ -1,3 +1,0 @@
-System.InvalidCastException: Unable to cast object of type 'System.Data.DataSet' to type 'System.IConvertible'.
-   at System.Convert.ToInt32(Object value)
-   at Timetable_Arrangement.Services.TimeTableArrangements.TimeTableArrangementsServices.ArrangeTimetable(TimeTableDto td, String clientId)

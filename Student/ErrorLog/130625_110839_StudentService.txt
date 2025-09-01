@@ -1,2 +1,0 @@
-Error: Value cannot be null. (Parameter 'connectionString') | StackTrace:    at Student.Repository.SQL.SQLHelperCore.ExecuteDatasetAsync(String connectionString, CommandType commandType, String commandText, SqlParameter[] commandParameters) in D:\bismafilre\SchoolApiCore\Student\Repository\SQL\SQLHelperCore.cs:line 230
-   at Student.Services.Students.StudentService.IsAdmissionNoDuplicateAsync(UpdateStudentRequestDTO request, String clientId) in D:\bismafilre\SchoolApiCore\Student\Services\Students\StudentService.cs:line 3369

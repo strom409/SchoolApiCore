@@ -1,3 +1,0 @@
-Column 'RouteName' does not belong to table Table. |    at System.Data.DataRow.GetDataColumn(String columnName)
-   at System.Data.DataRow.get_Item(String columnName)
-   at Student.Services.Students.StudentService.GetAllActiveStudentsOnSectionIDCrescentSchool(String sectionID) in D:\bismafilre\SchoolApiCore\Student\Services\Students\StudentService.cs:line 1500

@@ -1,2 +1,0 @@
-System.Exception: DUPLICATE_STUDENT
-   at SchoolApiCore.Services.ClassMasterService.AddClass(ClassDto classDto) in D:\bismafilre\SchoolApiCore\Student\Services\ClassMaster\ClassMasterService.cs:line 28

@@ -1,7 +1,0 @@
-System.InvalidCastException: Object cannot be cast from DBNull to other types.
-   at System.DBNull.System.IConvertible.ToInt32(IFormatProvider provider)
-   at Student.Services.District.DistrictService.<>c.<GetAllDistricts>b__2_0(DataRow row) in D:\bismafilre\SchoolApiCore\Student\Services\District\DistrictService.cs:line 49
-   at System.Linq.Enumerable.SelectEnumerableIterator`2.MoveNext()
-   at System.Collections.Generic.List`1..ctor(IEnumerable`1 collection)
-   at System.Linq.Enumerable.ToList[TSource](IEnumerable`1 source)
-   at Student.Services.District.DistrictService.GetAllDistricts(String clientId) in D:\bismafilre\SchoolApiCore\Student\Services\District\DistrictService.cs:line 48

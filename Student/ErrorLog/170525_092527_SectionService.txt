@@ -1,2 +1,0 @@
-System.Exception: DUPLICATE_SECTION
-   at SchoolApiCore.Services.ClassMasterService.AddSection(SectionDto section) in D:\bismafilre\SchoolApiCore\Student\Services\ClassMaster\ClassMasterService.cs:line 104

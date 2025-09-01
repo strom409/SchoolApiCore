@@ -1,3 +1,0 @@
-System.ArgumentNullException: Value cannot be null. (Parameter 'connectionString')
-   at Student.Repository.SQL.SQLHelperCore.ExecuteNonQueryAsync(String connectionString, CommandType commandType, String commandText, SqlParameter[] commandParameters) in D:\bismafilre\SchoolApiCore\Student\Repository\SQL\SQLHelperCore.cs:line 169
-   at Student.Repository.GenerateToken.CreateToken(String userId, IConfiguration configuration) in D:\bismafilre\SchoolApiCore\Student\Repository\GenerateToken.cs:line 66

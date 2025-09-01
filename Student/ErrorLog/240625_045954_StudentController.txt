@@ -1,5 +1,0 @@
-System.ArgumentNullException: Value cannot be null. (Parameter 'connectionString')
-   at Student.Repository.SQL.SQLHelperCore.ExecuteDatasetAsync(String connectionString, CommandType commandType, String commandText, SqlParameter[] commandParameters) in D:\bismafilre\SchoolApiCore\Student\Repository\SQL\SQLHelperCore.cs:line 230
-   at Student.Services.Students.StudentService.IsAdmissionNoDuplicateAsync(UpdateStudentRequestDTO request, String clientId) in D:\bismafilre\SchoolApiCore\Student\Services\Students\StudentService.cs:line 3186
-   at Student.Services.Students.StudentService.UpdateStudentAsync(UpdateStudentRequestDTO request, String clientId) in D:\bismafilre\SchoolApiCore\Student\Services\Students\StudentService.cs:line 3070
-   at SchoolApiCore.Controllers.StudentController.UpdateStudent(Int32 actionType, UpdateStudentRequestDTO request) in D:\bismafilre\SchoolApiCore\Student\Services\Students\StudentController.cs:line 200

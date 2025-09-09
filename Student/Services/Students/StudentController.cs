@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using Student.Repository;
 using Student.Services.Students;
 using System.Data;
+using System.Text.Json;
 using static System.Collections.Specialized.BitVector32;
 
 namespace SchoolApiCore.Controllers
@@ -18,10 +19,12 @@ namespace SchoolApiCore.Controllers
     public class StudentController : ControllerBase
     {
         private readonly IStudentService _studentService;
+     
 
         public StudentController(IStudentService studentService)
         {
             _studentService = studentService;
+           
         }
         /// <summary>
         /// 
@@ -36,8 +39,9 @@ namespace SchoolApiCore.Controllers
 
             try
             {
-                  var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
-                
+                 var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+
+
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");
 
@@ -69,6 +73,7 @@ namespace SchoolApiCore.Controllers
 
             return Ok(response);
         }
+        
         /// <summary>
         /// 
         /// </summary>
@@ -85,7 +90,8 @@ namespace SchoolApiCore.Controllers
                 Message = "Issue at Controller Level !",
 
             };
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+              var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             try
@@ -163,7 +169,10 @@ namespace SchoolApiCore.Controllers
                         return Ok(await _studentService.GetBoardNoWithDate(param, clientId));
                     case 19: // Get GetAllSessions 
                         return Ok(await _studentService.GetAllSessions(clientId));
-
+                    case 20: // 🔹 New case: Get StudentID from StudentInfoID
+                        if (string.IsNullOrEmpty(param))
+                            return BadRequest(new ResponseModel { IsSuccess = true, Status = 0 });
+                        return Ok(await _studentService.GetStudentIdAsync(param, clientId));
 
                     default:
                         return BadRequest(new ResponseModel { IsSuccess = true, Status = 0 });
@@ -263,64 +272,57 @@ namespace SchoolApiCore.Controllers
 
                         response = await _studentService.UpdateStudentHeightWeightAdharNamePENEtcUDISE(request, clientId);
                         break;
-                    case 15:
-                        var sessionRequest = JsonConvert.DeserializeObject<UpdateStudentRequestDTO>(
-                            JsonConvert.SerializeObject(request)
-                        );
-                        response = await _studentService.UpdateStudentSessionAsync(sessionRequest, clientId);
-                        break;
-                    case 16:
-                        try
-                        {
-                            // Initialize empty updates list
-                            var updates = new List<StudentRollNoUpdate>();
+             
+                    //case 16:
+                    //    try
+                    //    {
+                    //        // Initialize empty updates list
+                    //        var updates = new List<StudentRollNoUpdate>();
 
-                            // Handle bulk updates
-                            if (request.BulkUpdates != null)
-                            {
-                                updates = request.BulkUpdates
-                                    .Where(u => u != null && u.StudentInfoID > 0 && !string.IsNullOrWhiteSpace(u.RollNo))
-                                    .ToList();
-                            }
-                            // Handle single update
-                            else if (!string.IsNullOrWhiteSpace(request.StudentInfoID) &&
-                                    int.TryParse(request.StudentInfoID, out var studentId) &&
-                                    studentId > 0 &&
-                                    !string.IsNullOrWhiteSpace(request.RollNo))
-                            {
-                                updates.Add(new StudentRollNoUpdate
-                                {
-                                    StudentInfoID = studentId,
-                                    RollNo = request.RollNo,
-                                    UpdatedBy = request.UpdatedBy ?? "System"
-                                });
-                            }
+                    //        // Handle bulk updates
+                    //        if (request.BulkUpdates != null)
+                    //        {
+                    //            updates = request.BulkUpdates
+                    //                .Where(u => u != null && u.StudentInfoID > 0 && !string.IsNullOrWhiteSpace(u.RollNo))
+                    //                .ToList();
+                    //        }
+                    //        // Handle single update
+                    //        else if (!string.IsNullOrWhiteSpace(request.StudentInfoID) &&
+                    //                int.TryParse(request.StudentInfoID, out var studentId) &&
+                    //                studentId > 0 &&
+                    //                !string.IsNullOrWhiteSpace(request.RollNo))
+                    //        {
+                    //            updates.Add(new StudentRollNoUpdate
+                    //            {
+                    //                StudentInfoID = studentId,
+                    //                RollNo = request.RollNo,
+                    //                UpdatedBy = request.UpdatedBy ?? "System"
+                    //            });
+                    //        }
 
-                            if (updates.Count == 0)
-                            {
-                                response = new ResponseModel
-                                {
-                                    IsSuccess = false,
-                                    Status = 400,
-                                    Message = "No valid roll number updates provided"
-                                };
-                                break;
-                            }
+                    //        if (updates.Count == 0)
+                    //        {
+                    //            response = new ResponseModel
+                    //            {
+                    //                IsSuccess = false,
+                    //                Message = "No valid roll number updates provided"
+                    //            };
+                    //            break;
+                    //        }
 
-                            response = await _studentService.UpdateClassStudentRollNumbers(updates, clientId);
-                        }
-                        catch (Exception ex)
-                        {
-                            response = new ResponseModel
-                            {
-                                IsSuccess = false,
-                                Status = 500,
-                                Message = $"Roll number update failed: {ex.Message}"
-                            };
-                            // Log error if needed
-                          Student.Repository.Error.ErrorBLL.CreateErrorLog("StudentController", "UpdateRollNumbers", ex.ToString());
-                        }
-                        break;
+                    //        response = await _studentService.UpdateClassStudentRollNumbers(updates, clientId);
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        response = new ResponseModel
+                    //        {
+                    //            IsSuccess = false,
+                    //            Message = $"Roll number update failed: {ex.Message}"
+                    //        };
+                    //        // Log error if needed
+                    //      Student.Repository.Error.ErrorBLL.CreateErrorLog("StudentController", "UpdateRollNumbers", ex.ToString());
+                    //    }
+                    //    break;
 
                     default:
                         response = new ResponseModel
@@ -349,10 +351,125 @@ namespace SchoolApiCore.Controllers
                 });
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="actionType"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("bulk-update-students")]
+        public async Task<IActionResult> BulkUpdateStudents([FromQuery] int actionType, [FromBody] object request)
+        {
+            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level !" };
+
+            try
+            {
+                // Get ClientId from Headers 
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return Unauthorized("ClientId missing");
+
+                switch (actionType)
+                {
+                    case 0: // Bulk RollNo Update
+                        {
+                            var rollUpdateRequest = JsonConvert.DeserializeObject<BulkRollNoUpdateRequest>(
+                                 ((JsonElement)request).GetRawText()
+                            );
+
+                            if (rollUpdateRequest?.BulkUpdates == null || !rollUpdateRequest.BulkUpdates.Any())
+                            {
+                                return BadRequest(new ResponseModel
+                                {
+                                    IsSuccess = false,
+                                    Message = "No roll number updates provided"
+                                });
+                            }
+
+                            var updates = rollUpdateRequest.BulkUpdates
+                                .Where(u => u.StudentInfoID.HasValue &&
+                                            u.StudentInfoID.Value > 0 &&
+                                            !string.IsNullOrWhiteSpace(u.RollNo))
+                                .ToList();
+
+                            if (!updates.Any())
+                            {
+                                return BadRequest(new ResponseModel
+                                {
+                                    IsSuccess = false,
+                                    Message = "No valid roll number updates found"
+                                });
+                            }
+
+                            response = await _studentService.UpdateClassStudentRollNumbers(updates, clientId);
+                            break;
+                        }
+
+                    case 15: // Bulk Session Update
+                        {
+                            string rawJson;
+
+                            // Handle both possible types
+                            if (request is JsonElement element)
+                            {
+                                rawJson = element.GetRawText();
+                            }
+                            else if (request is JObject jObject)
+                            {
+                                rawJson = jObject.ToString();
+                            }
+                            else
+                            {
+                                rawJson = request.ToString();
+                            }
+
+                            var sessionRequest = JsonConvert.DeserializeObject<StudentSessionUpdateRequest>(rawJson);
+
+                            if (sessionRequest?.Students == null || !sessionRequest.Students.Any())
+                            {
+                                return BadRequest(new ResponseModel
+                                {
+                                    IsSuccess = false,
+                                    Message = "No session update data provided"
+                                });
+                            }
+
+                            response = await _studentService.UpdateStudentSessionAsync(sessionRequest, clientId);
+                            break;
+                        }
+
+
+                    default:
+                        response = new ResponseModel
+                        {
+                            IsSuccess = false,
+                            Message = "Invalid ActionType"
+                        };
+                        break;
+                }
+
+                return response.IsSuccess ? Ok(response) : BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                Student.Repository.Error.ErrorBLL.CreateErrorLog(
+                    "StudentRollNoController", "BulkUpdateStudents", ex.ToString());
+
+                return StatusCode(500, new ResponseModel
+                {
+                    IsSuccess = false,
+                    Status = -1,
+                    Error = ex.Message
+                });
+            }
+        }
 
 
     }
 }
+
+
+
 
 
 

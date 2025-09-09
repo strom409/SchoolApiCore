@@ -107,6 +107,10 @@
         public string? PrStateID { get; set; }
 
         public string? PrStateName { get; set; }
+        public string? FatherPhotoPath { get; set; }
+        public string? MotherPhotoPath { get; set; }
+
+
 
     }
 

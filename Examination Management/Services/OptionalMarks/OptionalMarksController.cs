@@ -24,8 +24,9 @@ namespace Examination_Management.Services.OptionalMarks
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
-
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
                 switch (actionType)
                 {
                     case 1: // Add OptionalMarks
@@ -58,7 +59,9 @@ namespace Examination_Management.Services.OptionalMarks
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
 
                 switch (actionType)
                 {
@@ -92,7 +95,9 @@ namespace Examination_Management.Services.OptionalMarks
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
 
                 switch (actionType)
                 {
@@ -127,7 +132,9 @@ namespace Examination_Management.Services.OptionalMarks
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
 
                 switch (actionType)
                 {

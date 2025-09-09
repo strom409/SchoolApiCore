@@ -18,7 +18,7 @@ namespace Examination_Management.Services.ExamGrades
         [HttpGet("fetch-examgrades")]
         public async Task<ActionResult<ResponseModel>> FetchExamGrades([FromQuery] int actionType, [FromQuery] string? param)
         {
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -61,7 +61,7 @@ namespace Examination_Management.Services.ExamGrades
         [HttpPost("add-examgrade")]
         public async Task<ActionResult<ResponseModel>> AddExamGrade([FromQuery] int actionType, [FromBody] ExamGradesDTO value)
         {
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -92,7 +92,7 @@ namespace Examination_Management.Services.ExamGrades
         [HttpPut("update-examgrade")]
         public async Task<ActionResult<ResponseModel>> UpdateExamGrade([FromQuery] int actionType, [FromBody] ExamGradesDTO value)
         {
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -125,7 +125,7 @@ namespace Examination_Management.Services.ExamGrades
         [HttpDelete("delete-examgrade")]
         public async Task<ActionResult<ResponseModel>> DeleteExamGrade([FromQuery] int actionType, [FromQuery] long id)
         {
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 

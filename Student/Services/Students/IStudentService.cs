@@ -32,7 +32,7 @@ namespace Student.Services.Students
         Task<ResponseModel> GetBoardNoWithDate(string classSectionId, string clientId);
         Task<ResponseModel> GetNextAdmissionNoAsync(string clientId);
         Task<ResponseModel> GetAllSessions(string clientId);
-
+        Task<ResponseModel> GetStudentIdAsync(string StudentIdDto, string clientId);
 
         Task<ResponseModel> UpdateStudentAsync(UpdateStudentRequestDTO request, string clientId);
 
@@ -57,7 +57,7 @@ namespace Student.Services.Students
 
         Task<ResponseModel> UpdateStudentHeightWeightAdharNamePENEtcUDISE(UpdateStudentRequestDTO request, string clientId);
 
-        Task<ResponseModel> UpdateStudentSessionAsync(UpdateStudentRequestDTO request, string clientId);
+        Task<ResponseModel> UpdateStudentSessionAsync(StudentSessionUpdateRequest request, string clientId);
 
     }
 }

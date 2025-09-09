@@ -41,8 +41,8 @@ namespace Student.Services.Students
         public string? MotherOccupation { get; set; }
         public string? FatherIcome { get; set; }
         public string? MotherIcome { get; set; }
-        public string? FatherPhoto { get; set; }
-        public string? MotherPhoto { get; set; }
+        //public string? FatherPhoto { get; set; }
+       // public string? MotherPhoto { get; set; }
         public string? Remarks { get; set; }
         public string? SEmail { get; set; }
 
@@ -109,16 +109,9 @@ namespace Student.Services.Students
 
         public string? PrStateName { get; set; }
         public IFormFile? StudentPhoto { get; set; }
-        //public IFormFile? FatherPhoto { get; set; }
-        //public IFormFile? MotherPhoto { get; set; }
-
-
-        public List<StudentSessionData>? Students { get; set; }
-
-        public List<StudentRollNoUpdate>? BulkUpdates { get; set; }
-        public bool? IsWholeClassUpdate { get; set; } = false;
-
-
+        public IFormFile? FatherPhoto { get; set; }
+        public IFormFile? MotherPhoto { get; set; }
+    
     }
 
     public class StudentRollNoUpdate
@@ -126,6 +119,12 @@ namespace Student.Services.Students
         public int? StudentInfoID { get; set; }
         public string RollNo { get; set; }
         public string UpdatedBy { get; set; }
+    }
+    public class BulkRollNoUpdateRequest
+    {
+        public List<StudentRollNoUpdate> BulkUpdates { get; set; } = new List<StudentRollNoUpdate>();
+        public bool? IsWholeClassUpdate { get; set; } = false;
+
     }
     public class StudentSessionData
     {
@@ -146,4 +145,9 @@ namespace Student.Services.Students
 
       
     }
+    public class StudentSessionUpdateRequest
+    {
+        public List<StudentSessionData>? Students { get; set; }
+    }
+
 }

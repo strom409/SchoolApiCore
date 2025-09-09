@@ -19,10 +19,14 @@ namespace Student.Services.Students
     {
 
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public StudentService(IConfiguration configuration)
+        public StudentService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env)
         {
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
+            _env = env;
         }
         /// <summary>
         /// 
@@ -50,63 +54,6 @@ namespace Student.Services.Students
                 }
 
                 #endregion
-
-                #region Save Student Photos
-
-                string? studentPhotoPath = null;
-                string? fatherPhotoPath = null;
-                string? motherPhotoPath = null;
-
-                // Function to save a photo and return relative path
-                async Task<string?> SavePhoto(IFormFile? file, string clientId, string studentInfoId, string type)
-                {
-                    if (file == null || file.Length == 0) return null;
-
-                    try
-                    {
-                        string projectRoot = Directory.GetCurrentDirectory();
-                        // Folder path: ClientData\<clientId>\<type>\<StudentInfoID>\
-                        string basePath = Path.Combine(projectRoot, "ClientData", clientId, type, studentInfoId ?? "UnknownStudent");
-
-                        if (!Directory.Exists(basePath))
-                            Directory.CreateDirectory(basePath);
-
-                        string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                        string fullPath = Path.Combine(basePath, fileName);
-
-                        using var stream = new FileStream(fullPath, FileMode.Create);
-                        await file.CopyToAsync(stream);
-
-                        // Relative path to store in DB
-                        string relativePath = Path.Combine("ClientData", clientId, type, studentInfoId ?? "UnknownStudent", fileName);
-
-                        // Log
-                        Repository.Error.ErrorBLL.CreateErrorLog(
-                            "StudentService",
-                            "AddStudent",
-                            $"{type} photo saved at: {fullPath}"
-                        );
-
-                        return relativePath;
-                    }
-                    catch (Exception ex)
-                    {
-                        Repository.Error.ErrorBLL.CreateErrorLog(
-                            "StudentService",
-                            "AddStudent",
-                            $"Failed to save {type} photo: {ex.Message}"
-                        );
-                        return null; // optionally throw if you want API to fail
-                    }
-                }
-
-                // Save each photo
-                studentPhotoPath = await SavePhoto(request.StudentPhoto, clientId, request.StudentInfoID?.ToString(), "StudentPhoto");
-                fatherPhotoPath = await SavePhoto(request.FatherPhoto, clientId, request.StudentInfoID?.ToString(), "FatherPhoto");
-                motherPhotoPath = await SavePhoto(request.MotherPhoto, clientId, request.StudentInfoID?.ToString(), "MotherPhoto");
-
-                #endregion
-
 
                 #region Validation
 
@@ -218,8 +165,8 @@ namespace Student.Services.Students
     new SqlParameter("@MotherIncome", request.MotherIncome ?? string.Empty),
     new SqlParameter("@FatherOccupation", request.FatherOccupation ?? string.Empty),
     new SqlParameter("@MotherOccupation", request.MotherOccupation ?? string.Empty),
-    new SqlParameter("@FatherPhoto", request.FatherPhoto),
-    new SqlParameter("@MotherPhoto", request.MotherPhoto),
+     new SqlParameter("@FatherPhoto", string.Empty),     // no DB save
+    new SqlParameter("@MotherPhoto", string.Empty),
     new SqlParameter("@Remarks", request.remarks ?? string.Empty),
     new SqlParameter("@SEmail", request.SEmail ?? string.Empty),
     new SqlParameter("@AcademicNo", request.AcademicNo ?? string.Empty),
@@ -281,20 +228,29 @@ namespace Student.Services.Students
                     proc,
                     insertParams.ToArray());
 
-                if (result > 0)
+                // 6️⃣ Get StudentID by AdmissionNo
+                string studentIdQuery = "SELECT MAX(StudentID) FROM Students WHERE AdmissionNo = @AdmissionNo";
+                var studentIdParam = new SqlParameter("@AdmissionNo", request.AdmissionNo ?? string.Empty);
+                var ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, studentIdQuery, new[] { studentIdParam });
+
+                string studentId = ds.Tables[0].Rows.Count > 0 ? ds.Tables[0].Rows[0][0].ToString() : null;
+
+
+                if (!string.IsNullOrEmpty(studentId))
                 {
                     response.IsSuccess = true;
                     response.Status = 1;
                     response.Message = "Student Added Successfully";
+                    response.ResponseData = new { StudentID = studentId }; // ✅ Return to gateway
                 }
                 else
                 {
                     response.IsSuccess = false;
-                    response.Status = 0;
-                    response.Message = "Student Not Added!";
+                    response.Message = "Failed to retrieve StudentID.";
                 }
 
                 return response;
+
 
                 #endregion
             }
@@ -1323,7 +1279,7 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         ClassID = row["ClassID"]?.ToString(),
                         SectionID = row["SessionID"]?.ToString(),
                         RollNo = row["RollNo"]?.ToString(),
-                        PhotoPath = row["PhotoPath"]?.ToString(),
+                        //PhotoPath = row["PhotoPath"]?.ToString(),
                         Remarks = row["Remarks"]?.ToString(),
                         RouteID = row["RouteID"]?.ToString(),
                         AcademicNo = row["AcademicNo"]?.ToString(),
@@ -1368,6 +1324,7 @@ WHERE s.AdmissionNo = @AdmissionNo";
 
                     };
 
+
                     response.IsSuccess = true;
                     response.Status = 1;
                     response.Message = "Student details fetched successfully.";
@@ -1388,7 +1345,6 @@ WHERE s.AdmissionNo = @AdmissionNo";
 
             return response;
         }
-
         /// <summary>
         /// 
         /// </summary>
@@ -3279,8 +3235,6 @@ ORDER BY RollNo";
 
             return response;
         }
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -3340,7 +3294,8 @@ ORDER BY RollNo";
         new SqlParameter("@Aadhaar", request.Aadhaar ?? string.Empty),
         new SqlParameter("@StudentCatID", request.StudentCatID ?? string.Empty),
         new SqlParameter("@StudentCatName", request.StudentCatName ?? string.Empty),
-        new SqlParameter("@PhotoPath", request.PhotoPath ?? string.Empty),
+        new SqlParameter("@PhotoPath", string.Empty),
+       // new SqlParameter("@PhotoPath", request.PhotoPath ?? string.Empty),
         new SqlParameter("@ClassID", request.ClassID ?? string.Empty),
         new SqlParameter("@SectionID", request.SectionID ?? string.Empty),
         new SqlParameter("@Session", request.Session ?? string.Empty),
@@ -3479,11 +3434,6 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 }
                 #endregion
 
-                #region Default UpdateType
-                if (request.UpdateType == null || request.UpdateType == 0)
-                    request.UpdateType = 1;
-                #endregion
-
                 #region Get StudentID by StudentInfoID
                 string getStudentIdQuery = "SELECT StudentID FROM StudentInfo WHERE StudentInfoID = @StudentInfoID";
                 SqlParameter[] getIdParam = {
@@ -3499,6 +3449,11 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 }
 
                 int studentId = Convert.ToInt32(ds.Tables[0].Rows[0]["StudentID"]);
+                #endregion
+
+                #region Default UpdateType
+                if (request.UpdateType == null || request.UpdateType == 0)
+                    request.UpdateType = 1;
                 #endregion
 
                 #region Prepare Update Parameters
@@ -3547,12 +3502,14 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 #region Exception Handling
                 response.IsSuccess = false;
                 response.Status = -1;
+                response.Status = -1;
                 response.Message = "Error: " + ex.Message;
                 #endregion
             }
 
             return response;
         }
+
 
         /// <summary>
         /// 
@@ -3654,6 +3611,7 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 response.Status = -1;
                 response.Message = "Error: " + ex.Message;
                 #endregion
+
             }
 
             return response;
@@ -3687,75 +3645,6 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                     return response;
                 }
                 #endregion
-                #region Save Student Photo
-                string? photoPath = null;
-                if (request.StudentPhoto != null && request.StudentPhoto.Length > 0)
-                {
-                    try
-                    {
-                        // Create folder inside project (cross-platform)
-                        string projectRoot = Directory.GetCurrentDirectory();
-
-                        // Folder path: ClientData\clientId\Student\StudentInfoID\StudentPhotos
-                        string basePath = Path.Combine(
-                            projectRoot,
-                            "ClientData",
-                            clientId,
-                            "StudentPhoto",
-                            request.StudentInfoID?.ToString() ?? "UnknownStudent"
-                            
-                        );
-
-
-                        // Create folder if it doesn't exist
-                        if (!Directory.Exists(basePath))
-                            Directory.CreateDirectory(basePath);
-
-                        string fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.StudentPhoto.FileName)}";
-                        string fullPath = Path.Combine(basePath, fileName);
-
-                        using var stream = new FileStream(fullPath, FileMode.Create);
-                        await request.StudentPhoto.CopyToAsync(stream);
-
-                        // Store relative path in DB
-                        photoPath = Path.Combine("ClientData", clientId, "StudentPhotos", fileName);
-
-                        // Optional: log folder/file path
-                        Student.Repository.Error.ErrorBLL.CreateErrorLog(
-                            "StudentController",
-                            "UpdatePersonalDetail",
-                            $"Photo saved at: {fullPath}"
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        Student.Repository.Error.ErrorBLL.CreateErrorLog(
-                            "StudentController",
-                            "UpdatePersonalDetail",
-                            $"Failed to save student photo: {ex.Message}"
-                        );
-                        // Optionally rethrow if you want API to fail
-                        throw;
-                    }
-                }
-                #endregion
-                //#region Save Student Photo
-                //string? photoPath = null;
-                //if (request.StudentPhoto != null && request.StudentPhoto.Length > 0)
-                //{
-                //    string basePath = Path.Combine("D:\\ClientData", clientId, "StudentPhotos");
-                //    if (!Directory.Exists(basePath)) Directory.CreateDirectory(basePath);
-
-                //    string fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.StudentPhoto.FileName)}";
-                //    string fullPath = Path.Combine(basePath, fileName);
-
-                //    using var stream = new FileStream(fullPath, FileMode.Create);
-                //    await request.StudentPhoto.CopyToAsync(stream);
-
-                //    // Relative path to store in DB
-                //    photoPath = Path.Combine("StudentPhotos", fileName);
-                //}
-                //#endregion
 
                 #region Get StudentID from StudentInfo
                 string getStudentIdQuery = "SELECT StudentID FROM StudentInfo WHERE StudentInfoID = @StudentInfoID";
@@ -3786,27 +3675,27 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 string endpoint = "update-personal-details";
 
                 SqlParameter[] sqlParam = {
-    new SqlParameter("@StudentInfoID", request.StudentInfoID ?? string.Empty),
-    new SqlParameter("@StudentName", request.StudentName ?? string.Empty),
-    new SqlParameter("@Aadhaar", request.Aadhaar ?? string.Empty),
-    new SqlParameter("@Gender", request.Gender ?? string.Empty),
-    new SqlParameter("@PEN", request.PEN ?? string.Empty),
-    new SqlParameter("@Weight", string.IsNullOrWhiteSpace(request.WEIGHT) ? (object)DBNull.Value : request.WEIGHT),
-    new SqlParameter("@Height", string.IsNullOrWhiteSpace(request.Height) ? (object)DBNull.Value : request.Height),
-   new SqlParameter("@StudentCatID",
-    !string.IsNullOrWhiteSpace(request.StudentCatID) && int.TryParse(request.StudentCatID, out int catId)
-        ? (object)catId
-        : DBNull.Value),
-    new SqlParameter("@StudentCatName", request.StudentCatName ?? string.Empty),
-    new SqlParameter("@RollNo", request.RollNo ?? string.Empty),
-    new SqlParameter("@PhoneNo", string.IsNullOrWhiteSpace(request.LandLineNo) ? (object)DBNull.Value : request.LandLineNo),
-    new SqlParameter("@HID", request.HID ?? string.Empty),
-    new SqlParameter("@HouseName", request.HouseName ?? string.Empty),
-    new SqlParameter("@BloodGroup", request.BloodGroup ?? "Unknown"),
-    new SqlParameter("@UpdatedBy", updatedBy),
-    new SqlParameter("@Endpoint", endpoint)
-};
-
+            new SqlParameter("@StudentInfoID", request.StudentInfoID ?? string.Empty),
+            new SqlParameter("@StudentName", request.StudentName ?? string.Empty),
+            new SqlParameter("@Aadhaar", request.Aadhaar ?? string.Empty),
+            new SqlParameter("@Gender", request.Gender ?? string.Empty),
+            new SqlParameter("@PEN", request.PEN ?? string.Empty),
+            new SqlParameter("@Weight", string.IsNullOrWhiteSpace(request.WEIGHT) ? (object)DBNull.Value : request.WEIGHT),
+            new SqlParameter("@Height", string.IsNullOrWhiteSpace(request.Height) ? (object)DBNull.Value : request.Height),
+            new SqlParameter("@StudentCatID",
+                !string.IsNullOrWhiteSpace(request.StudentCatID) && int.TryParse(request.StudentCatID, out int catId)
+                    ? (object)catId
+                    : DBNull.Value),
+            new SqlParameter("@StudentCatName", request.StudentCatName ?? string.Empty),
+            new SqlParameter("@RollNo", request.RollNo ?? string.Empty),
+            new SqlParameter("@PhoneNo", string.IsNullOrWhiteSpace(request.LandLineNo) ? (object)DBNull.Value : request.LandLineNo),
+            new SqlParameter("@HID", request.HID ?? string.Empty),
+            new SqlParameter("@HouseName", request.HouseName ?? string.Empty),
+            new SqlParameter("@BloodGroup", request.BloodGroup ?? "Unknown"),
+            //new SqlParameter("@PhotoPath", studentPhotoPath ?? string.Empty),
+            new SqlParameter("@UpdatedBy", updatedBy),
+            new SqlParameter("@Endpoint", endpoint)
+        };
                 #endregion
 
                 #region Execute Stored Procedure
@@ -3831,15 +3720,179 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
             }
             catch (Exception ex)
             {
-                #region Exception Handling
                 response.IsSuccess = false;
                 response.Status = -1;
                 response.Message = "Error: " + ex.Message;
-                #endregion
             }
 
             return response;
         }
+
+
+        //public async Task<ResponseModel> UpdatePersonalDetail(UpdateStudentRequestDTO request, string clientId)
+        //{
+        //    #region Initialize Response
+        //    ResponseModel response = new ResponseModel
+        //    {
+        //        IsSuccess = false,
+        //        Status = 0,
+        //        Message = "Student Not Updated!"
+        //    };
+        //    #endregion
+
+        //    try
+        //    {
+        //        #region Get Connection String
+        //        var connectionStringHelper = new ConnectionStringHelper(_configuration);
+        //        string connectionString = connectionStringHelper.GetConnectionString(clientId);
+
+        //        if (string.IsNullOrEmpty(connectionString))
+        //        {
+        //            response.Message = "Invalid client ID.";
+        //            return response;
+        //        }
+        //        #endregion
+        //        #region Validation
+        //        if (request.StudentPhoto == null)
+        //        {
+        //            response.Message = "StudentPhoto is required.";
+        //            return response;
+        //        }
+        //        #endregion
+        //        #region Save Student Photo
+        //        string? photoPath = null;
+        //        if (request.StudentPhoto != null && request.StudentPhoto.Length > 0)
+        //        {
+        //            try
+        //            {
+        //                // Root = wwwroot/ClientData/{clientId}/StudentPhoto/{StudentInfoID}
+        //                string wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+        //                string basePath = Path.Combine(
+        //                    wwwRootPath,
+        //                    "ClientData",
+        //                    clientId,
+        //                    "StudentPhoto",
+        //                    request.StudentInfoID?.ToString() ?? "UnknownStudent"
+        //                );
+
+        //                if (!Directory.Exists(basePath))
+        //                    Directory.CreateDirectory(basePath);
+
+        //                string fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.StudentPhoto.FileName)}";
+        //                string fullPath = Path.Combine(basePath, fileName);
+
+        //                using var stream = new FileStream(fullPath, FileMode.Create);
+        //                await request.StudentPhoto.CopyToAsync(stream);
+
+        //                // Relative path to save in DB (for frontend to access)
+        //                photoPath = Path.Combine("ClientData", clientId, "StudentPhoto", request.StudentInfoID?.ToString() ?? "UnknownStudent", fileName);
+
+        //                // Log success
+        //                Student.Repository.Error.ErrorBLL.CreateErrorLog(
+        //                    "StudentController",
+        //                    "UpdatePersonalDetail",
+        //                    $"Photo saved at: {fullPath}"
+        //                );
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Student.Repository.Error.ErrorBLL.CreateErrorLog(
+        //                    "StudentController",
+        //                    "UpdatePersonalDetail",
+        //                    $"Failed to save student photo: {ex.Message}"
+        //                );
+        //                throw;
+        //            }
+        //        }
+        //        #endregion
+
+
+
+        //        #region Get StudentID from StudentInfo
+        //        string getStudentIdQuery = "SELECT StudentID FROM StudentInfo WHERE StudentInfoID = @StudentInfoID";
+        //        SqlParameter[] getIdParam = {
+        //            new SqlParameter("@StudentInfoID", request.StudentInfoID)
+        //        };
+
+        //        DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, getStudentIdQuery, getIdParam);
+
+        //        if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
+        //        {
+        //            response.Message = "Invalid StudentInfoID!";
+        //            return response;
+        //        }
+
+        //        object studentIdObj = ds.Tables[0].Rows[0]["StudentID"];
+        //        if (studentIdObj == null || studentIdObj == DBNull.Value)
+        //        {
+        //            response.Message = "StudentID not found!";
+        //            return response;
+        //        }
+
+        //        int studentId = Convert.ToInt32(studentIdObj);
+        //        #endregion
+
+        //        #region Prepare SQL Parameters
+        //        string updatedBy = request.UpdatedBy ?? "System";
+        //        string endpoint = "update-personal-details";
+
+        //        SqlParameter[] sqlParam = {
+        //    new SqlParameter("@StudentInfoID", request.StudentInfoID ?? string.Empty),
+        //    new SqlParameter("@StudentName", request.StudentName ?? string.Empty),
+        //    new SqlParameter("@Aadhaar", request.Aadhaar ?? string.Empty),
+        //    new SqlParameter("@Gender", request.Gender ?? string.Empty),
+        //    new SqlParameter("@PEN", request.PEN ?? string.Empty),
+        //    new SqlParameter("@Weight", string.IsNullOrWhiteSpace(request.WEIGHT) ? (object)DBNull.Value : request.WEIGHT),
+        //    new SqlParameter("@Height", string.IsNullOrWhiteSpace(request.Height) ? (object)DBNull.Value : request.Height),
+        //   new SqlParameter("@StudentCatID",
+        //    !string.IsNullOrWhiteSpace(request.StudentCatID) && int.TryParse(request.StudentCatID, out int catId)
+        //        ? (object)catId
+        //        : DBNull.Value),
+        //    new SqlParameter("@StudentCatName", request.StudentCatName ?? string.Empty),
+        //    new SqlParameter("@RollNo", request.RollNo ?? string.Empty),
+        //    new SqlParameter("@PhoneNo", string.IsNullOrWhiteSpace(request.LandLineNo) ? (object)DBNull.Value : request.LandLineNo),
+        //    new SqlParameter("@HID", request.HID ?? string.Empty),
+        //    new SqlParameter("@HouseName", request.HouseName ?? string.Empty),
+        //    new SqlParameter("@BloodGroup", request.BloodGroup ?? "Unknown"),
+        //    new SqlParameter("@PhotoPath", photoPath ?? string.Empty),
+        //    new SqlParameter("@UpdatedBy", updatedBy),
+        //    new SqlParameter("@Endpoint", endpoint)
+        //};
+
+        //        #endregion
+
+        //        #region Execute Stored Procedure
+        //        int rowsAffected = await SQLHelperCore.ExecuteNonQueryAsync(
+        //            connectionString,
+        //            CommandType.StoredProcedure,
+        //            "UpdateStudentPersonalDetailsAPINew",
+        //            sqlParam
+        //        );
+
+        //        if (rowsAffected > 0)
+        //        {
+        //            response.IsSuccess = true;
+        //            response.Status = 1;
+        //            response.Message = "Student Personal Details Updated Successfully";
+        //        }
+        //        else
+        //        {
+        //            response.Message = "Failed to Update Student Personal Details!";
+        //        }
+        //        #endregion
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        #region Exception Handling
+        //        response.IsSuccess = false;
+        //        response.Status = -1;
+        //        response.Message = "Error: " + ex.Message;
+        //        #endregion
+        //    }
+
+        //    return response;
+        //}
         /// <summary>
         /// 
         /// </summary>
@@ -3941,104 +3994,7 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
         /// 
         /// </summary>
         /// <param name="request"></param>
-        /// <param name="clientId"></param>
-        /// <returns></returns>
-
-        //public async Task<ResponseModel> UpdateClassStudentRollNumbers(UpdateStudentRequestDTO request, string clientId)
-        //{
-        //    #region Initialize Response
-        //    ResponseModel response = new ResponseModel
-        //    {
-        //        IsSuccess = false,
-        //        Status = 0,
-        //        Message = "Student Not Updated!"
-        //    };
-        //    #endregion
-
-        //    try
-        //    {
-        //        #region Get Connection String
-        //        var connectionStringHelper = new ConnectionStringHelper(_configuration);
-        //        string connectionString = connectionStringHelper.GetConnectionString(clientId);
-
-        //        if (string.IsNullOrEmpty(connectionString))
-        //        {
-        //            response.Message = "Invalid client ID.";
-        //            return response;
-        //        }
-        //        #endregion
-
-        //        #region Get StudentID from StudentInfo
-        //        string getStudentIdQuery = "SELECT StudentID FROM StudentInfo WHERE StudentInfoID = @StudentInfoID";
-        //        SqlParameter[] getIdParam = {
-        //    new SqlParameter("@StudentInfoID", request.StudentInfoID)
-        //};
-
-        //        DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, getStudentIdQuery, getIdParam);
-
-        //        if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
-        //        {
-        //            response.Message = "Invalid StudentInfoID!";
-        //            return response;
-        //        }
-
-        //        object studentIdObj = ds.Tables[0].Rows[0]["StudentID"];
-
-        //        if (studentIdObj == null || studentIdObj == DBNull.Value)
-        //        {
-        //            response.Message = "StudentID not found!";
-        //            return response;
-        //        }
-
-        //        int studentId = Convert.ToInt32(studentIdObj);
-        //        request.StudentID = studentId.ToString(); // optional assignment back
-        //        #endregion
-
-        //        #region Prepare Parameters and Execute Update
-        //        string updatedBy = request.UpdatedBy ?? "System";
-        //        string endpoint = "update-rollno";
-
-        //        SqlParameter[] sqlParam = {
-        //    new SqlParameter("@StudentInfoID", request.StudentInfoID),
-        //    new SqlParameter("@RollNo", request.RollNo ?? string.Empty),
-        //    new SqlParameter("@UpdatedBy", updatedBy),
-        //    new SqlParameter("@Endpoint", endpoint)
-        //};
-
-        //        int rowsAffected = await SQLHelperCore.ExecuteNonQueryAsync(
-        //            connectionString,
-        //            CommandType.StoredProcedure,
-        //            "UpdateRollNoAPINew",
-        //            sqlParam
-        //        );
-
-        //        if (rowsAffected > 0)
-        //        {
-        //            response.IsSuccess = true;
-        //            response.Status = 1;
-        //            response.Message = "Student RollNo Updated Successfully";
-        //        }
-        //        else
-        //        {
-        //            response.Message = "Failed to Update Student RollNo";
-        //        }
-        //        #endregion
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        #region Exception Handling
-        //        response.IsSuccess = false;
-        //        response.Status = -1;
-        //        response.Message = "Error: " + e.Message;
-        //        #endregion
-        //    }
-
-        //    return response;
-        //}
-        /// <summary>
         /// 
-        /// </summary>
-        /// <param name="request"></param>
         /// <param name="clientId"></param>
         /// <returns></returns>
         public async Task<ResponseModel> UpdateBoardNo(UpdateStudentRequestDTO request, string clientId)
@@ -4989,7 +4945,7 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
         /// <param name="request"></param>
         /// <param name="clientId"></param>
         /// <returns></returns>
-        public async Task<ResponseModel> UpdateStudentSessionAsync(UpdateStudentRequestDTO request, string clientId)
+        public async Task<ResponseModel> UpdateStudentSessionAsync(StudentSessionUpdateRequest request, string clientId)
         {
             var rp = new ResponseModel { IsSuccess = true, Message = "No Record updated!", Status = 0 };
 
@@ -5166,7 +5122,12 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
 
             return response;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="updates"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> UpdateClassStudentRollNumbers(List<StudentRollNoUpdate> updates, string clientId)
         {
             var response = new ResponseModel
@@ -5261,285 +5222,90 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
             return response;
         }
 
-        //public async Task<ResponseModel> UpdateClassStudentRollNumbers(UpdateStudentRequestDTO request, string clientId)
-        //{
-        //    #region Initialize Response
-        //    ResponseModel response = new ResponseModel
-        //    {
-        //        IsSuccess = false,
-        //        Status = 0,
-        //        Message = "Student Not Updated!"
-        //    };
-        //    #endregion
+        public async Task<ResponseModel> GetStudentIdAsync(string studentInfoId, string clientId)
+        {
+            var response = new ResponseModel
+            {
+                IsSuccess = false,
+                Status = 0,
+                Message = "Student ID not found",
+                ResponseData = null
+            };
 
-        //    try
-        //    {
-        //        #region Get Connection String
-        //        var connectionStringHelper = new ConnectionStringHelper(_configuration);
-        //        string connectionString = connectionStringHelper.GetConnectionString(clientId);
+            try
+            {
+                #region Get Connection String
+                var connectionStringHelper = new ConnectionStringHelper(_configuration);
+                string connectionString = connectionStringHelper.GetConnectionString(clientId);
 
-        //        if (string.IsNullOrEmpty(connectionString))
-        //        {
-        //            response.Message = "Invalid client ID.";
-        //            return response;
-        //        }
-        //        #endregion
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    response.Message = "Invalid Client ID";
+                    return response;
+                }
+                #endregion
 
-        //        #region Create DataTable for Bulk Updates
-        //        // Create DataTable matching your RollNoUpdateType
-        //        DataTable updateBatch = new DataTable();
-        //        updateBatch.Columns.Add("StudentInfoID", typeof(int));
-        //        updateBatch.Columns.Add("ClassID", typeof(int));
-        //        updateBatch.Columns.Add("SectionID", typeof(int));
-        //        updateBatch.Columns.Add("RollNo", typeof(string));
+                #region Validate input
+                if (string.IsNullOrEmpty(studentInfoId))
+                {
+                    response.Message = "StudentInfoID is required";
+                    return response;
+                }
+                #endregion
 
-        //        // Get student details for the current update
-        //        string getStudentDetailsQuery = @"
-        //    SELECT StudentInfoID, ClassID, SectionID, RollNo 
-        //    FROM StudentInfo 
-        //    WHERE StudentInfoID = @StudentInfoID";
+                #region Get StudentID from StudentInfo
+                string query = "SELECT StudentID FROM StudentInfo WHERE StudentInfoID = @StudentInfoID";
+                SqlParameter[] param = { new SqlParameter("@StudentInfoID", studentInfoId) };
 
-        //        SqlParameter[] getDetailsParam = {
-        //    new SqlParameter("@StudentInfoID", request.StudentInfoID)
-        //};
+                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, query, param);
 
-        //        DataSet studentDetails = await SQLHelperCore.ExecuteDatasetAsync(
-        //            connectionString,
-        //            CommandType.Text,
-        //            getStudentDetailsQuery,
-        //            getDetailsParam);
+                if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
+                {
+                    response.Message = "No student found for the given StudentInfoID";
+                    return response;
+                }
 
-        //        if (studentDetails == null || studentDetails.Tables.Count == 0 || studentDetails.Tables[0].Rows.Count == 0)
-        //        {
-        //            response.Message = "Invalid StudentInfoID!";
-        //            return response;
-        //        }
+                object studentIdObj = ds.Tables[0].Rows[0]["StudentID"];
+                if (studentIdObj == null || studentIdObj == DBNull.Value)
+                {
+                    response.Message = "StudentID is null";
+                    return response;
+                }
 
-        //        DataRow studentRow = studentDetails.Tables[0].Rows[0];
+                // ✅ Wrap into DTO
+                var studentIdDto = new StudentIdDto
+                {
+                    StudentID = studentIdObj.ToString()
+                };
 
-        //        // Add the current update to the batch
-        //        updateBatch.Rows.Add(
-        //            request.StudentInfoID,
-        //            studentRow["ClassID"],
-        //            studentRow["SectionID"],
-        //            request.RollNo ?? string.Empty
-        //        );
-        //        #endregion
+                response.IsSuccess = true;
+                response.Status = 1;
+                response.Message = "Student ID retrieved successfully";
+                response.ResponseData = studentIdDto;
+                #endregion
 
-        //        #region Execute Bulk Update
-        //        string updatedBy = request.UpdatedBy ?? "System";
-        //        string endpoint = "update-rollno";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                Repository.Error.ErrorBLL.CreateErrorLog(
+                    "StudentRepository",
+                    "GetStudentIdAsync",
+                    ex.Message + " | " + ex.StackTrace
+                );
 
-        //        SqlParameter[] sqlParam = {
-        //    new SqlParameter("@Updates", updateBatch) {
-        //        SqlDbType = SqlDbType.Structured,
-        //        TypeName = "dbo.RollNoUpdateType"
-        //    },
-        //    new SqlParameter("@UpdatedBy", updatedBy),
-        //    new SqlParameter("@Endpoint", endpoint)
-        //};
-
-        //        int rowsAffected = await SQLHelperCore.ExecuteNonQueryAsync(
-        //            connectionString,
-        //            CommandType.StoredProcedure,
-        //            "UpdateRollNoAPINew3",
-        //            sqlParam
-        //        );
-
-        //        if (rowsAffected > 0)
-        //        {
-        //            response.IsSuccess = true;
-        //            response.Status = 1;
-        //            response.Message = "Student RollNo Updated Successfully";
-        //        }
-        //        else
-        //        {
-        //            response.Message = "Failed to Update Student RollNo";
-        //        }
-        //        #endregion
-        //    }
-        //    catch (SqlException sqlEx)
-        //    {
-        //        #region SQL Exception Handling
-        //        response.IsSuccess = false;
-        //        response.Status = -1;
-
-        //        // Handle duplicate roll number error specifically
-        //        if (sqlEx.Message.Contains("Duplicate RollNo"))
-        //        {
-        //            response.Message = "This roll number is already assigned to another student in the same class/section.";
-        //        }
-        //        else
-        //        {
-        //            response.Message = "Database error: " + sqlEx.Message;
-        //        }
-        //        #endregion
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        #region General Exception Handling
-        //        response.IsSuccess = false;
-        //        response.Status = -1;
-        //        response.Message = "Error: " + e.Message;
-        //        #endregion
-        //    }
-
-        //    return response;
-        //}
-
-
-        //        public async Task<ResponseModel> UpdateClassStudentRollNumbers(UpdateStudentRequestDTO request, string clientId)
-        //        {
-        //            var response = new ResponseModel
-        //            {
-        //                IsSuccess = false,
-        //                Status = 0,
-        //                Message = "Roll numbers not updated!"
-        //            };
-
-        //            try
-        //            {
-        //                #region Get Connection String
-        //                var connectionString = new ConnectionStringHelper(_configuration).GetConnectionString(clientId);
-        //                if (string.IsNullOrEmpty(connectionString))
-        //                {
-        //                    response.IsSuccess = false;
-        //                    response.Message = "Invalid client ID.";
-        //                    return response;
-        //                }
-        //                #endregion
-
-        //                // Determine update type
-        //                var updateType = DetermineUpdateType(request);
-        //                if (updateType == UpdateType.Invalid)
-        //                {
-        //                    response.Message = "Invalid request - must provide either StudentInfoID or BulkUpdates";
-        //                    return response;
-        //                }
-
-        //                using (var connection = new SqlConnection(connectionString))
-        //                {
-        //                    await connection.OpenAsync();
-
-        //                    // Use transaction only for bulk operations
-        //                    SqlTransaction transaction = null;
-        //                    if (updateType != UpdateType.Single)
-        //                    {
-        //                        transaction = connection.BeginTransaction();
-        //                    }
-
-        //                    try
-        //                    {
-        //                        var updatedBy = request.UpdatedBy ?? "System";
-        //                        var endpoint = "rollno-update";
-
-        //                        switch (updateType)
-        //                        {
-        //                            case UpdateType.Single:
-        //                                await ExecuteSingleUpdate(connection, request, updatedBy, endpoint);
-        //                                response.Message = "Roll number updated successfully";
-        //                                break;
-
-        //                            case UpdateType.Multiple:
-        //                                await ExecuteBulkUpdate(connection, transaction, request, updatedBy, endpoint, false);
-        //                                response.Message = $"Updated {request.BulkUpdates.Count} student roll numbers";
-        //                                break;
-
-        //                            case UpdateType.WholeClass:
-        //                                await ExecuteBulkUpdate(connection, transaction, request, updatedBy, endpoint, true);
-        //                                response.Message = $"Updated whole class ({request.BulkUpdates.Count} students)";
-        //                                break;
-        //                        }
-
-        //                        transaction?.Commit();
-        //                        response.IsSuccess = true;
-        //                        response.Status = 1;
-        //                    }
-        //                    catch (SqlException sqlEx) when (sqlEx.Number == 50000) // RAISERROR
-        //                    {
-        //                        transaction?.Rollback();
-        //                        response.Message = sqlEx.Message;
-        //                        response.Status = -1;
-        //                    }
-        //                    catch (Exception ex)
-        //                    {
-        //                        transaction?.Rollback();
-        //                        response.Message = $"Error: {ex.Message}";
-        //                        response.Status = -1;
-        //                    }
-        //                }
-        //            }
-        //            catch (Exception e)
-        //            {
-        //                response.Message = "System error: " + e.Message;
-        //                response.Status = -1;
-        //            }
-
-        //            return response;
-        //        }
-
-        //        private async Task ExecuteSingleUpdate(
-        //            SqlConnection connection,
-        //            UpdateStudentRequestDTO request,
-        //            string updatedBy,
-        //            string endpoint)
-        //        {
-        //            SqlParameter[] sqlParams = {
-        //        new SqlParameter("@StudentInfoID", request.StudentInfoID),
-        //        new SqlParameter("@RollNo", request.RollNo ?? (object)DBNull.Value),
-        //        new SqlParameter("@UpdatedBy", updatedBy),
-        //        new SqlParameter("@Endpoint", endpoint),
-        //        new SqlParameter("@IsBulkOperation", 0)
-        //    };
-
-        //            await SQLHelperCore.ExecuteNonQueryAsync(
-        //                connection.ConnectionString,
-        //                CommandType.StoredProcedure,
-        //                "UpdateRollNoAPINew1",
-        //                sqlParams);
-        //        }
-
-        //private async Task ExecuteBulkUpdate(
-        //    SqlConnection connection,
-        //    SqlTransaction transaction,
-        //    UpdateStudentRequestDTO request,
-        //    string updatedBy,
-        //    string endpoint,
-        //    bool isWholeClassUpdate)
-        //{
-        //    foreach (var studentUpdate in request.BulkUpdates)
-        //    {
-        //        var cmd = new SqlCommand("UpdateRollNoAPINew1", connection, transaction)
-        //        {
-        //            CommandType = CommandType.StoredProcedure
-        //        };
-
-        //        cmd.Parameters.Add(new SqlParameter("@StudentInfoID", studentUpdate.StudentInfoID));
-        //        cmd.Parameters.Add(new SqlParameter("@RollNo", studentUpdate.RollNo ?? (object)DBNull.Value));
-        //        cmd.Parameters.Add(new SqlParameter("@UpdatedBy", updatedBy));
-        //        cmd.Parameters.Add(new SqlParameter("@Endpoint", endpoint));
-        //        cmd.Parameters.Add(new SqlParameter("@IsBulkOperation", isWholeClassUpdate ? 1 : 0));
-
-        //        await cmd.ExecuteNonQueryAsync();
-        //    }
-        //}
-
-        //        private enum UpdateType { Invalid, Single, Multiple, WholeClass }
-
-        //        private UpdateType DetermineUpdateType(UpdateStudentRequestDTO request)
-        //        {
-        //            if (request.StudentInfoID != null && request.BulkUpdates == null)
-        //                return UpdateType.Single;
-
-        //            if (request.BulkUpdates != null && request.BulkUpdates.Any())
-        //                return request.IsWholeClassUpdate ? UpdateType.WholeClass : UpdateType.Multiple;
-
-        //            return UpdateType.Invalid;
-        //        }
-
+                response.Message = "Internal server error";
+                response.Error = ex.Message;
+                response.Status = -1;
+                return response;
+            }
+        }
 
     }
 }
+
+
+
 
 
 

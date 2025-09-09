@@ -22,7 +22,9 @@ namespace Examination_Management.Services.MaxMarks
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
 
                 switch (actionType)
                 {
@@ -56,7 +58,9 @@ namespace Examination_Management.Services.MaxMarks
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
 
                 switch (actionType)
                 {
@@ -90,7 +94,9 @@ namespace Examination_Management.Services.MaxMarks
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
 
                 switch (actionType)
                 {
@@ -127,7 +133,9 @@ namespace Examination_Management.Services.MaxMarks
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
 
                 switch (actionType)
                 {

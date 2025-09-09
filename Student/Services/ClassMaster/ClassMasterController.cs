@@ -166,7 +166,7 @@ namespace Student.Services.ClassMaster
         [HttpDelete("delete")]
         public async Task<IActionResult> Delete([FromQuery] int actionType, [FromQuery] int id)
         {
-            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level!};
+            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level!" };
 
             try
             {

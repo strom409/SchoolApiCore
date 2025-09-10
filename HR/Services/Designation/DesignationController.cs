@@ -19,7 +19,7 @@ namespace HR.Services.Designation
         public async Task<ActionResult<ResponseModel>> FetchDesignationData([FromQuery] int actionType, [FromQuery] string? param)
         {
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -76,7 +76,7 @@ namespace HR.Services.Designation
         [HttpPost("add-designation")]
         public async Task<ActionResult<ResponseModel>> AddDesignation([FromQuery] int actionType, [FromBody] Designations value)
         {
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -110,7 +110,7 @@ namespace HR.Services.Designation
         public async Task<ActionResult<ResponseModel>> UpdateDesignation([FromQuery] int actionType, [FromBody] Designations value)
         {
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -156,7 +156,7 @@ namespace HR.Services.Designation
       [FromQuery] long id)
         {
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion

@@ -25,10 +25,10 @@ namespace HR.Services.PayRoll
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Invalid Request!"
+                Message = "Issue at Controller Level !"
             };
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -70,10 +70,10 @@ namespace HR.Services.PayRoll
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Invalid Request!"
+                Message = "Issue at Controller Level !"
             };
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -124,21 +124,20 @@ namespace HR.Services.PayRoll
         [HttpGet("fetch-loan-details")]
         public async Task<ActionResult<ResponseModel>> FetchLoanDetails([FromQuery] int actionType, [FromQuery] string? param)
         {
-            #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
-            if (string.IsNullOrEmpty(clientId))
-                return BadRequest("ClientId header missing");
-            #endregion
 
             #region Initialize Response
             var response = new ResponseModel
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Invalid Request!"
+                Message = "Issue at Controller Level !"
             };
             #endregion
-
+            #region Get ClientId
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            if (string.IsNullOrEmpty(clientId))
+                return BadRequest("ClientId header missing");
+            #endregion
             try
             {
                 switch (actionType)

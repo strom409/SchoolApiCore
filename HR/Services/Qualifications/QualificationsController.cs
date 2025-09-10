@@ -20,7 +20,7 @@ namespace HR.Services.Qualifications
         {
             var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level !" };
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -64,11 +64,11 @@ namespace HR.Services.Qualifications
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Qualification not added"
+                Message = "Issue at Controller Level !"
             };
             #endregion
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -111,11 +111,11 @@ namespace HR.Services.Qualifications
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Qualification not updated"
+                Message = "Issue at Controller Level !"
             };
             #endregion
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -159,15 +159,13 @@ namespace HR.Services.Qualifications
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Qualification not deleted"
+                Message = "Issue at Controller Level !"
             };
             #endregion
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
-
-
 
             try
             {

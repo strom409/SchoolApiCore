@@ -29,10 +29,7 @@ namespace Transport.Services
                 // Extract clientId from header (or from JWT claims if applicable)
                 var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
                 if (string.IsNullOrEmpty(clientId))
-                {
-                    response.Message = "ClientId header is missing.";
-                    return BadRequest(response);
-                }
+                    return BadRequest("ClientId header missing");
 
                 // Validate input
                 if (request == null)

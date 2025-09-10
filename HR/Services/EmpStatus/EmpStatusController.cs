@@ -16,9 +16,11 @@ namespace HR.Services.EmpStatus
         [HttpGet("get-employee-status")]
         public async Task<ActionResult<ResponseModel>> GetEmployeeStatus([FromQuery] int actionType)
         {
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
             var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level !" };
 
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+            if (string.IsNullOrEmpty(clientId))
+                return BadRequest("ClientId header missing");
             try
             {
                 switch (actionType)

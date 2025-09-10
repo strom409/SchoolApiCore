@@ -20,12 +20,12 @@ namespace HR.Services.GrossPay
         {
             var response = new ResponseModel
             {
-                IsSuccess = false,
+                IsSuccess = true,
                 Status = 0,
-                Message = "Invalid request"
+                Message = "Issue at Controller Level !"
             };
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -74,7 +74,7 @@ namespace HR.Services.GrossPay
                 Message = "Issue at Controller Level!"
             };
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -123,7 +123,7 @@ namespace HR.Services.GrossPay
             };
 
             // Get clientId from headers
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
             {
                 response.Message = "ClientId header missing";

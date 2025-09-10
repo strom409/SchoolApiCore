@@ -126,8 +126,9 @@ namespace Student.Services.ClassMaster
             {
                 // You can later fetch this from headers if needed
                 var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
-                return BadRequest("ClientId header missing");
 
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
                 switch (actionType)
                 {
                     case 0: // Update Class

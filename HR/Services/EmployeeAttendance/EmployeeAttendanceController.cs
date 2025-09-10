@@ -24,7 +24,7 @@ namespace HR.Services.EmployeeAttendance
                 Message = "Issue at Controller Level !"
             };
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             try
@@ -61,7 +61,7 @@ namespace HR.Services.EmployeeAttendance
                 Message = "Issue at Controller Level !"
             };
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -99,7 +99,7 @@ namespace HR.Services.EmployeeAttendance
                 Message = "Issue at Controller Level !"
             };
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -145,7 +145,7 @@ namespace HR.Services.EmployeeAttendance
                 Message = "Issue at Controller Level !"
             };
 
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 

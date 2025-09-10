@@ -90,7 +90,10 @@ namespace SchoolApiCore.Controllers
                 Message = "Issue at Controller Level !",
 
             };
-              var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+             var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+
+            //  var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+           // var clientId = "client1";
 
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");

@@ -20,16 +20,11 @@ namespace HR.Services.Salary
         public async Task<IActionResult> SalaryActions([FromQuery] int actionType, [FromBody] SalaryData request)
         {
             #region Initialize Response
-            ResponseModel response = new ResponseModel
-            {
-                IsSuccess = false,
-                Status = -1,
-                Message = "Invalid ActionType"
-            };
+            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level !" };
             #endregion
 
             #region Get ClientId from Header
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -129,20 +124,14 @@ namespace HR.Services.Salary
         [HttpGet("fetch-salary-data")]
         public async Task<ActionResult<ResponseModel>> FetchSalaryData([FromQuery] int actionType, [FromQuery] string? param)
         {
-            #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
-            if (string.IsNullOrEmpty(clientId))
-                return BadRequest("ClientId header missing");
-            #endregion
 
             #region Initialize Response
-            var response = new ResponseModel
-            {
-                IsSuccess = true,
-                Status = 0,
-                Message = "Invalid  Request!",
-                ResponseData = null
-            };
+            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level !" };
+            #endregion
+            #region Get ClientId
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+            if (string.IsNullOrEmpty(clientId))
+                return BadRequest("ClientId header missing");
             #endregion
 
             try

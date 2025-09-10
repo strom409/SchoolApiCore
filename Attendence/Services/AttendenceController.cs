@@ -114,7 +114,12 @@ namespace Attendence.Services
         [HttpGet("attendance")]
         public async Task<ActionResult<ResponseModel>> FetchAttendance(int actionType, string? param)
         {
-            var response = new ResponseModel { IsSuccess = true, Status = 0 };
+            var response = new ResponseModel
+            {
+                IsSuccess = true,
+                Status = 0,
+                Message = "Issue at Controller Level !"
+            };
             var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
 
             if (string.IsNullOrEmpty(clientId))

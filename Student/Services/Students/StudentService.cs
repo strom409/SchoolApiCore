@@ -1303,7 +1303,8 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         PrimaryDate = row["PrimaryDate"]?.ToString(),
                         HighDate = row["HighDate"]?.ToString(),
                         MiddleDate = row["MiddleDate"]?.ToString(),
-                        PrePrimaryDate = row["PrePrimaryDate"]?.ToString(),
+                        PrePrimaryDate = row["PrePrimaryDate"] != DBNull.Value
+                       ? Convert.ToDateTime(row["PrePrimaryDate"]).ToString("yyyy-MM-dd"): null,
                         HigherDate = row["HigherDate"]?.ToString(),
                         Session = row["Current_Session"]?.ToString(),
                         HID = row["HID"]?.ToString(),
@@ -1311,7 +1312,8 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         WEIGHT = row["WEIGHT"]?.ToString(),
                         Height = row["Height"]?.ToString(),
                         NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
-                        DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
+                        DOBASPERADHAAR = row["DOBASPERADHAAR"] != DBNull.Value
+                         ? Convert.ToDateTime(row["DOBASPERADHAAR"]).ToString("yyyy-MM-dd"): null,
                         Apaarid = row["APAARSTUDENTID"]?.ToString(),
                         HouseName = row["HouseName"]?.ToString(),
                         PrPincode = row["PrPincode"]?.ToString(),
@@ -5200,12 +5202,13 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 new SqlParameter("@Endpoint", "bulk-update-rollno")
                     });
 
-                response.IsSuccess = rowsAffected > 0;
-                response.Status = rowsAffected > 0 ? 1 : 0;
-                response.Message = rowsAffected > 0
-                    ? $"Updated {rowsAffected} student roll numbers"
+                response.IsSuccess = rowsAffected > 0 || rowsAffected == -1; // -1 might indicate success in some cases
+                response.Status = response.IsSuccess ? 1 : 0;
+                response.Message = response.IsSuccess
+                    ? "Student roll numbers updated successfully"
                     : "No students were updated";
             }
+         
             catch (SqlException sqlEx)
             {
                 response.Status = -1;

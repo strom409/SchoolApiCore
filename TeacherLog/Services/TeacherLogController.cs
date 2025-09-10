@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using TeacherLog.Repository;
@@ -24,6 +25,8 @@ namespace TeacherLog.Services
             try
             {
                 var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing.");
 
                 switch (actionType)
                 {
@@ -69,7 +72,9 @@ namespace TeacherLog.Services
             try
             {
                 // Get client ID from header
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing.");
 
                 switch (actionType)
                 {
@@ -104,7 +109,9 @@ namespace TeacherLog.Services
 
             try
             {
-                string clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing.");
 
                 switch (actionType)
                 {
@@ -171,7 +178,9 @@ namespace TeacherLog.Services
             try
             {
                 // Get client ID from header or fallback default
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing.");
 
                 switch (actionType)
                 {

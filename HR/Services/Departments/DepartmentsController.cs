@@ -20,7 +20,7 @@ namespace HR.Services.Deparments
         public async Task<ActionResult<ResponseModel>> DepartmentAdd([FromQuery] int actionType, [FromBody] SubDepartment value)
         {
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -62,7 +62,7 @@ namespace HR.Services.Deparments
     [FromBody] SubDepartment value)
         {
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -105,7 +105,7 @@ namespace HR.Services.Deparments
     [FromQuery] long id)
         {
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -155,7 +155,7 @@ namespace HR.Services.Deparments
     [FromQuery] long id)
         {
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion

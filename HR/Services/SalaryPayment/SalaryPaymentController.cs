@@ -1,4 +1,5 @@
-﻿using HR.Repository;
+﻿using Azure;
+using HR.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,13 +20,14 @@ namespace HR.Services.SalaryPayment
         [HttpPost("salary-payment")]
         public async Task<ActionResult<ResponseModel>> Post([FromQuery] int actionType, [FromBody] List<SalaryPayment> value)
         {
-            ResponseModel rp = new ResponseModel
+            #region Initialize Response
+            var response = new ResponseModel
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Request failed!",
-                ResponseData = null
+                Message = "Issue at Controller Level !"
             };
+            #endregion
 
             try
             {
@@ -36,24 +38,24 @@ namespace HR.Services.SalaryPayment
                 switch (actionType)
                 {
                     case 0:
-                        rp = await _salaryPaymentService.AddSalaryPayment(value, clientId);
+                        response = await _salaryPaymentService.AddSalaryPayment(value, clientId);
                         break;
 
                     default:
-                        rp.IsSuccess = false;
-                        rp.Message = "Invalid actionType!";
+                        response.IsSuccess = false;
+                        response.Message = "Invalid actionType!";
                         break;
                 }
             }
             catch (Exception ex)
             {
-                rp.IsSuccess = false;
-                rp.Status = -1;
-                rp.Message = "Error: " + ex.Message;
+                response.IsSuccess = false;
+                response.Status = -1;
+                response.Message = "Error: " + ex.Message;
                 Repository.Error.ErrorBLL.CreateErrorLog("SalaryPaymentController", "Post", ex.ToString());
             }
 
-            return Ok(rp);
+            return Ok(response);
         }
 
 
@@ -72,8 +74,7 @@ namespace HR.Services.SalaryPayment
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Invalid Type ID",
-                ResponseData = null
+                Message = "Issue at Controller Level !"
             };
             #endregion
 
@@ -115,10 +116,9 @@ namespace HR.Services.SalaryPayment
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Invalid Type Request ID"
+                Message = "Issue at Controller Level !"
             };
             #endregion
-
             try
             {
                 switch (actionType)

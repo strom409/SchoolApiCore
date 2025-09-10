@@ -25,12 +25,12 @@ namespace HR.Services
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Invalid Request!"
+                Message = "Issue at Controller Level !"
             };
             #endregion
 
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -74,12 +74,12 @@ namespace HR.Services
             {
                 IsSuccess = true,
                 Status = 0,
-                Message = "Invalid Request!"
+                Message = "Issue at Controller Level !"
             };
             #endregion
 
             #region Get ClientId
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -137,8 +137,13 @@ namespace HR.Services
         [HttpGet("fetch")]
         public async Task<ActionResult<ResponseModel>> FetchEmployeeData([FromQuery] int actionType, [FromQuery] string? param)
         {
-            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "No Data Found!" };
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var response = new ResponseModel
+            {
+                IsSuccess = true,
+                Status = 0,
+                Message = "Issue at Controller Level !"
+            };
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
 
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
@@ -221,10 +226,6 @@ namespace HR.Services
 
             return Ok(response);
         }
-
-       
-
-
 
     }
 }

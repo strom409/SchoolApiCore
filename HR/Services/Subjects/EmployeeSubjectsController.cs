@@ -11,23 +11,20 @@ namespace HR.Services.Subjects
         private readonly IEmployeeSubjectsService _employeeSubjectsService;
         public EmployeeSubjectsController(IEmployeeSubjectsService employeeSubjectsService)
         {
-            _employeeSubjectsService= employeeSubjectsService;
+            _employeeSubjectsService = employeeSubjectsService;
         }
 
         [HttpPost("add")]
         public async Task<IActionResult> Add([FromQuery] int actionType, [FromBody] EmployeeSubjects request)
         {
-            #region Initialize Response
-            ResponseModel response = new ResponseModel
+            var response = new ResponseModel
             {
-                IsSuccess = false,
-                Status = -1,
-                Message = "Invalid ActionType"
+                IsSuccess = true,
+                Status = 0,
+                Message = "Issue at Controller Level !"
             };
-            #endregion
-
             #region Get ClientId from Header
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -70,16 +67,16 @@ namespace HR.Services.Subjects
         public async Task<IActionResult> Update([FromQuery] int actionType, [FromBody] EmployeeSubjects request)
         {
             #region Initialize Response
-            ResponseModel response = new ResponseModel
+            var response = new ResponseModel
             {
-                IsSuccess = false,
-                Status = -1,
-                Message = "Invalid ActionType"
+                IsSuccess = true,
+                Status = 0,
+                Message = "Issue at Controller Level !"
             };
             #endregion
 
             #region Get ClientId from Header
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -122,16 +119,16 @@ namespace HR.Services.Subjects
         public async Task<IActionResult> Delete([FromQuery] int actionType, [FromBody] EmployeeSubjects request)
         {
             #region Initialize Response
-            ResponseModel response = new ResponseModel
+            var response = new ResponseModel
             {
-                IsSuccess = false,
-                Status = -1,
-                Message = "Invalid ActionType"
+                IsSuccess = true,
+                Status = 0,
+                Message = "Issue at Controller Level !"
             };
             #endregion
 
             #region Get ClientId from Header
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion
@@ -175,14 +172,14 @@ namespace HR.Services.Subjects
             #region Initialize Response
             var response = new ResponseModel
             {
-                IsSuccess = false,
-                Status = -1,
-                Message = "Invalid ActionType"
+                IsSuccess = true,
+                Status = 0,
+                Message = "Issue at Controller Level !"
             };
             #endregion
 
             #region Get ClientId from Header
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault() ?? "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
             #endregion

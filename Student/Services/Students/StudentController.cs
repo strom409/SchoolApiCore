@@ -176,6 +176,12 @@ namespace SchoolApiCore.Controllers
                         if (string.IsNullOrEmpty(param))
                             return BadRequest(new ResponseModel { IsSuccess = true, Status = 0 });
                         return Ok(await _studentService.GetStudentIdAsync(param, clientId));
+                    case 21: // Attendance Dashboard
+                        if (string.IsNullOrEmpty(param))
+                            return BadRequest(new ResponseModel { IsSuccess = true, Status = 0 });
+
+                        // Call the service method that returns attendance dashboard data
+                        return Ok(await _studentService.AttendanceDashboardForDate(param, clientId));
 
                     default:
                         return BadRequest(new ResponseModel { IsSuccess = true, Status = 0 });

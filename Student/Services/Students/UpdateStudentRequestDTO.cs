@@ -119,7 +119,7 @@ namespace Student.Services.Students
         public int? StudentInfoID { get; set; }
         public string RollNo { get; set; }
         public string UpdatedBy { get; set; }
-    }
+        }
     public class BulkRollNoUpdateRequest
     {
         public List<StudentRollNoUpdate> BulkUpdates { get; set; } = new List<StudentRollNoUpdate>();

@@ -1664,7 +1664,7 @@ INNER JOIN Classes c ON si.ClassID = c.ClassID
 LEFT JOIN Sections se ON si.SectionID = se.SectionID
 LEFT JOIN Transport t ON t.RouteID = si.RouteID
 LEFT JOIN BusStops bs ON bs.BusStopID = si.BusStopID
-WHERE si.DSession = @CurrentSession";
+WHERE si.Current_Session = @CurrentSession";
 
             var parameters = new List<SqlParameter>
     {
@@ -2806,24 +2806,29 @@ ORDER BY
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
                 {
                     DataRow dr = ds.Tables[0].Rows[0];
-                    response.ResponseData = $"{dr["TS"]}|{dr["TMS"]}|{dr["TFS"]}"; // TotalStudents|TotalMaleStudents|TotalFemaleStudents
+                    response.ResponseData = $"{dr["TS"]}|{dr["TMS"]}|{dr["TFS"]}|{dr["TotalEmployees"]}|{dr["ActiveEmployees"]}|{dr["InactiveEmployees"]}|{dr["TME"]}|{dr["TFE"]}|{dr["TeachingEmployees"]}|{dr["NonTeachingEmployees"]}|{dr["TotalRoutes"]}";
+                    // Format: TotalStudents|TotalMaleStudents|TotalFemaleStudents|TotalEmployees|ActiveEmployees|InactiveEmployees|TotalMaleEmployees|TotalFemaleEmployees|TeachingEmployees|NonTeachingEmployees|TotalRoutes
+
                     response.Message = "ok";
                     response.Status = 1;
                 }
                 else
                 {
-                    response.ResponseData = "0|0|0";
+                    response.ResponseData = "0|0|0|0|0|0|0|0|0|0|0";
+                    // Matching number of placeholders (11 values now)
                 }
 
                 return response;
-                #endregion
             }
+            #endregion
+
+
             catch (Exception ex)
             {
                 #region Exception Handling
                 response.Status = -1;
                 response.IsSuccess = false;
-                response.ResponseData = "0|0|0";
+                response.ResponseData = "0|0|0|0|0|0|0|0|0|0|0";
                 response.Message = "Error: " + ex.Message;
                 return response;
                 #endregion
@@ -3237,6 +3242,59 @@ ORDER BY RollNo";
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        public async Task<ResponseModel> AttendanceDashboardForDate(string session, string clientId)
+        {
+            var response = new ResponseModel
+            {
+                IsSuccess = true,
+                Message = "No Records Found!",
+                Status = 0
+            };
+
+            try
+            {
+                var connectionStringHelper = new ConnectionStringHelper(_configuration);
+                string connectionString = connectionStringHelper.GetConnectionString(clientId);
+
+                SqlParameter param = new SqlParameter("@LiveSession", session);
+
+                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(
+                    connectionString,
+                    CommandType.StoredProcedure,
+                    "AttendanceDashboardAPI",
+                    param
+                );
+
+                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    DataRow dr = ds.Tables[0].Rows[0];
+                    response.ResponseData = $"{dr["PresentToday"]}|{dr["AbsentToday"]}|{dr["LeaveToday"]}|{dr["HalfDayToday"]}";
+                    response.Message = "ok";
+                    response.Status = 1;
+                }
+                else
+                {
+                    response.ResponseData = "0|0|0|0";
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Status = -1;
+                response.IsSuccess = false;
+                response.ResponseData = "0|0|0|0";
+                response.Message = "Error: " + ex.Message;
+                return response;
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -5148,19 +5206,20 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                     return response;
                 }
 
-                // Create DataTable for TVP
+                // Create DataTable for TVP (must match TVP order exactly)
                 var updateBatch = new DataTable();
                 updateBatch.Columns.Add("StudentInfoID", typeof(int));
+                updateBatch.Columns.Add("RollNo", typeof(string));
                 updateBatch.Columns.Add("ClassID", typeof(int));
                 updateBatch.Columns.Add("SectionID", typeof(int));
-                updateBatch.Columns.Add("RollNo", typeof(string));
+                updateBatch.Columns.Add("Current_Session", typeof(string));
 
-                // Get student details in batch
+                // Get student details including Current_Session
                 var studentIds = string.Join(",", updates.Select(u => u.StudentInfoID));
                 var studentDetails = await SQLHelperCore.ExecuteDatasetAsync(
                     connectionString,
                     CommandType.Text,
-                    $"SELECT StudentInfoID, ClassID, SectionID FROM StudentInfo WHERE StudentInfoID IN ({studentIds})");
+                    $"SELECT StudentInfoID, ClassID, SectionID, Current_Session FROM StudentInfo WHERE StudentInfoID IN ({studentIds})");
 
                 if (studentDetails?.Tables.Count == 0)
                 {
@@ -5168,8 +5227,9 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                     return response;
                 }
 
-                // Map to DataTable
                 var detailsTable = studentDetails.Tables[0];
+
+                // Map to DataTable matching TVP order
                 foreach (var update in updates)
                 {
                     var rows = detailsTable.Select($"StudentInfoID = {update.StudentInfoID}");
@@ -5177,9 +5237,10 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                     {
                         updateBatch.Rows.Add(
                             update.StudentInfoID,
-                            rows[0]["ClassID"],
-                            rows[0]["SectionID"],
-                            update.RollNo ?? string.Empty
+                            update.RollNo ?? string.Empty,     // RollNo
+                            rows[0]["ClassID"],                // ClassID
+                            rows[0]["SectionID"],              // SectionID
+                            rows[0]["Current_Session"]         // Current_Session
                         );
                     }
                 }
@@ -5197,23 +5258,23 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                     "UpdateRollNoAPINew3",
                     new SqlParameter[]
                     {
-                new SqlParameter("@Updates", updateBatch) { SqlDbType = SqlDbType.Structured, TypeName = "dbo.RollNoUpdateType" },
+                new SqlParameter("@Updates", updateBatch)
+                    { SqlDbType = SqlDbType.Structured, TypeName = "dbo.RollNoUpdateType_v2" },
                 new SqlParameter("@UpdatedBy", updates.FirstOrDefault()?.UpdatedBy ?? "System"),
                 new SqlParameter("@Endpoint", "bulk-update-rollno")
                     });
 
-                response.IsSuccess = rowsAffected > 0 || rowsAffected == -1; // -1 might indicate success in some cases
+                response.IsSuccess = rowsAffected > 0 || rowsAffected == -1;
                 response.Status = response.IsSuccess ? 1 : 0;
                 response.Message = response.IsSuccess
                     ? "Student roll numbers updated successfully"
                     : "No students were updated";
             }
-         
             catch (SqlException sqlEx)
             {
                 response.Status = -1;
                 response.Message = sqlEx.Message.Contains("Duplicate RollNo")
-                    ? "Duplicate roll number detected in class/section"
+                    ? "Duplicate roll number detected in class/section for current session"
                     : $"Database error: {sqlEx.Message}";
             }
             catch (Exception ex)

@@ -2874,7 +2874,8 @@ ORDER BY
                             MaleStudents = dr["MaleStudents"].ToString(),
                             FemaleStudents = dr["FemaleStudents"].ToString(),
                             PresentTotal = dr["PresentTotal"].ToString(),
-                            AbsentTotal = dr["AbsentTotal"].ToString()
+                            AbsentTotal = dr["AbsentTotal"].ToString(),
+                            Leave = dr["LeaveTotal"].ToString()
                         };
 
                         studentList.Add(studentRoll);
@@ -3029,7 +3030,7 @@ ORDER BY
                         ClassWiseStudentsRollDTO Cr = new ClassWiseStudentsRollDTO
                         {
                             ClassID = dr["SecID"].ToString(),        // Section ID
-                            ClassName = dr["ClassName"].ToString(),  // Section Name
+                            SectionName = dr["ClassName"].ToString(),  // Section Name
                             TotalStudents = dr["TotalStudents"].ToString(),
                             MaleStudents = dr["MaleStudents"].ToString(),
                             FemaleStudents = dr["FemaleStudents"].ToString(),

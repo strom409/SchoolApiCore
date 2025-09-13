@@ -4,6 +4,7 @@
     {
         public string ClassID { get; set; }
         public string ClassName { get; set; }
+        public string SectionName { get; set; }
         public string TotalStudents { get; set; }
         public string MaleStudents { get; set; }
         public string FemaleStudents { get; set; }

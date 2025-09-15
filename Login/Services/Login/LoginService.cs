@@ -15,7 +15,11 @@ namespace Login.Services.Login
             _configuration = configuration;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> LoginAsync(LoginDto request)
         {
             var response = new ResponseModel
@@ -129,8 +133,12 @@ WHERE UserName = @UserName
                 return response;
             }
         }
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="UID"></param>
+        /// <param name="connectionString"></param>
+        /// <returns></returns>
         public static async Task<UserAccessDto> getUserAccessDataAsync(string UID, string connectionString)
         {
             #region Variable Declaration and SQL Setup
@@ -166,9 +174,12 @@ WHERE UserName = @UserName
             return ua;
             #endregion
         }
-
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> ValidateToken(string token, string clientId)
         {
             ResponseModel response = new ResponseModel

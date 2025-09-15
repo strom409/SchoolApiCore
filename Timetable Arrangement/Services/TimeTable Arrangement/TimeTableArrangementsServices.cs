@@ -9,7 +9,7 @@ using Timetable_Arrangement.Services.TTAssignPeroids;
 
 namespace Timetable_Arrangement.Services.TimeTableArrangements
 {
-    public class TimeTableArrangementsServices :ITimeTableArrangementsServices
+    public class TimeTableArrangementsServices : ITimeTableArrangementsServices
     {
         private readonly IConfiguration _configuration;
         public TimeTableArrangementsServices(IConfiguration configuration)
@@ -17,6 +17,12 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
             _configuration = configuration;
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="td"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> ArrangeTimetable(TimeTableDto td, string clientId)
         {
             #region Initialize Response
@@ -126,7 +132,12 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="onDate"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetTimeTableArrangementsByDate(string onDate, string clientId)
         {
             #region Initialize Response
@@ -226,6 +237,13 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public async Task<ResponseModel> GetTimeTableArrangementsOfAbsentTeacherToday(string input, string clientId)
         {
             #region Initialize Response
@@ -240,7 +258,7 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
             try
             {
 
-          
+
                 #region Get Connection String
                 var connectionStringHelper = new ConnectionStringHelper(_configuration);
                 string connectionString = connectionStringHelper.GetConnectionString(clientId);
@@ -334,6 +352,13 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="updatedBy"></param>
+        /// <param name="session"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> ResetTimeTable(string updatedBy, string session, string clientId)
         {
             #region Initialize Response
@@ -390,9 +415,12 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
-
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetEmployeeList(string year, string clientId)
         {
             #region Initialize Response
@@ -480,6 +508,11 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetEmployeeList(string clientId)
         {
             #region Initialize Response
@@ -553,7 +586,12 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetEmployeeListNotInTimeTable(string year, string clientId)
         {
             #region Initialize Response
@@ -642,6 +680,12 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetEmployeeListWhoAreInTimeTable(string year, string clientId)
         {
             #region Initialize Response
@@ -730,6 +774,12 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="td"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> DeleteTimetable(TimeTableDelete td, string clientId)
         {
             #region Initialize Response
@@ -805,7 +855,12 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="td"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> DeleteArrangementTimetable(TimeTable td, string clientId)
         {
             #region Initialize Response
@@ -907,7 +962,6 @@ namespace Timetable_Arrangement.Services.TimeTableArrangements
 
             return response;
         }
-
 
     }
 }

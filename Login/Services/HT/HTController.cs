@@ -10,20 +10,20 @@ namespace Login.Services.HT
     public class HTController : ControllerBase
     {
 
-         private readonly IHTService _htService;
+        private readonly IHTService _htService;
         public HTController(IHTService htService)
         {
-            _htService=htService;
+            _htService = htService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<ResponseModel>> GetHT([FromQuery] int actionType)
+        public async Task<ActionResult<ResponseModel>> GetHT([FromQuery] string clientId, [FromQuery] int actionType)
         {
             var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Invalid Request" };
 
-            var clientId = "client1";
             if (string.IsNullOrEmpty(clientId))
-                return BadRequest("ClientId header missing");
+                return BadRequest("ClientId is required");
+
             try
             {
                 switch (actionType)
@@ -50,29 +50,29 @@ namespace Login.Services.HT
 
                 return StatusCode(500, response);
             }
-            
         }
 
         [HttpPut]
-        public async Task<ActionResult<ResponseModel>> UpdateHT(
-            [FromQuery] int actionType,
-            [FromBody] object payload)
+        public async Task<ActionResult<ResponseModel>> UpdateHT([FromQuery] int actionType, [FromQuery] string clientId,
+         [FromBody] object payload)
+
         {
             var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Invalid Request" };
 
+            // Validate clientId
+            if (string.IsNullOrEmpty(clientId))
+                return BadRequest("ClientId is required");
             try
             {
-                var clientId = Request.Headers["ClientId"].ToString();
-                if (string.IsNullOrEmpty(clientId))
-                    clientId = "client1";
-
-
                 switch (actionType)
                 {
                     case 0:
                         var htDto = JsonConvert.DeserializeObject<HTModel>(payload.ToString());
                         if (htDto == null)
-                            return BadRequest(new ResponseModel { IsSuccess = false, Message = "Invalid payload for UpdateHT", Status = -1 });
+                            return BadRequest(new ResponseModel
+                            {
+                                Message = "Invalid payload for UpdateHT",
+                            });
 
                         response = await _htService.UpdateHT(htDto, clientId);
                         break;
@@ -84,7 +84,6 @@ namespace Login.Services.HT
                             Message = "Invalid actionType"
                         });
                 }
-
 
                 return Ok(response);
             }
@@ -99,8 +98,8 @@ namespace Login.Services.HT
 
                 return StatusCode(500, response);
             }
-           
         }
+
 
     }
 }

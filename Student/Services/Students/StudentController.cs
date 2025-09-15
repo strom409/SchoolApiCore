@@ -19,7 +19,11 @@ namespace SchoolApiCore.Controllers
     public class StudentController : ControllerBase
     {
         private readonly IStudentService _studentService;
-     
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="studentService"></param>
 
         public StudentController(IStudentService studentService)
         {
@@ -472,8 +476,6 @@ namespace SchoolApiCore.Controllers
                 });
             }
         }
-
-
     }
 }
 

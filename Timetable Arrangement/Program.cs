@@ -20,8 +20,6 @@ builder.Services.AddScoped<ITTAssignPeroidsService, TTAssignPeroidsService>();
 builder.Services.AddScoped<ITTDaysService, TTDaysService>();
 builder.Services.AddScoped<ITTPeroidService, TTPeroidService>();
 builder.Services.AddScoped<ITTPeroidsNoService, TTPeroidsNoService>();
-
-
 builder.Services.AddScoped<ErrorBLL>();
 
 var app = builder.Build();

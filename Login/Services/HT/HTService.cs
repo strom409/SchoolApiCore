@@ -12,7 +12,11 @@ namespace Login.Services.HT
         {
             _configuration= configuration;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> getHT(string clientId)
         {
             #region Initialize Response
@@ -71,6 +75,12 @@ namespace Login.Services.HT
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="htData"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
 
         public async Task<ResponseModel> UpdateHT(HTModel htData, string clientId)
         {

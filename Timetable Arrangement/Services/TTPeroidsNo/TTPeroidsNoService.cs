@@ -13,6 +13,12 @@ namespace Timetable_Arrangement.Services.TTPeroids
         {
             _configuration = configuration;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pid"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> PeroidName(string pid, string clientId)
         {
             #region Initialize Response
@@ -66,8 +72,6 @@ namespace Timetable_Arrangement.Services.TTPeroids
 
             return response;
         }
-
-      
 
     }
 

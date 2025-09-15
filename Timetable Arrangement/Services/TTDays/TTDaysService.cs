@@ -13,7 +13,12 @@ namespace Timetable_Arrangement.Services.TTDays
         {
             _configuration= configuration;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="did"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> DaydName(string did, string clientId)
         {
             #region Initialize Response
@@ -67,6 +72,11 @@ namespace Timetable_Arrangement.Services.TTDays
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> getweekdays(string clientId)
         {
             #region Initialize Response
@@ -121,7 +131,12 @@ namespace Timetable_Arrangement.Services.TTDays
 
             return response;
         }
-       
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="years"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetwholetimetableProc(string years, string clientId)
         {
             #region Initialize Response

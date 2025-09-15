@@ -17,7 +17,12 @@ namespace Timetable_Arrangement.Services.TTAssignPeroids
             _configuration= configuration;
             _ttPeroidsNoService= ttPeroidsNoService;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="td"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> AssignTimetable(TimeTable td, string clientId)
         {
             #region Initialize Response
@@ -105,6 +110,12 @@ namespace Timetable_Arrangement.Services.TTAssignPeroids
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="teacherId"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetassignedTT(string teacherId, string clientId)
         {
             #region Initialize Response
@@ -193,6 +204,11 @@ namespace Timetable_Arrangement.Services.TTAssignPeroids
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> Getwholetimetable(string clientId)
         {
             #region Initialize Response
@@ -283,6 +299,12 @@ namespace Timetable_Arrangement.Services.TTAssignPeroids
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="teacherId"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetTeacherTimeTable(string teacherId, string clientId)
         {
             #region Initialize Response
@@ -375,6 +397,12 @@ namespace Timetable_Arrangement.Services.TTAssignPeroids
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetTimeTableWithCurrentSession(string session, string clientId)
         {
             #region Initialize Response
@@ -524,6 +552,12 @@ namespace Timetable_Arrangement.Services.TTAssignPeroids
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ttval"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> SwapTimeTable(TimeTable ttval, string clientId)
         {
             #region Initialize Response
@@ -587,6 +621,12 @@ namespace Timetable_Arrangement.Services.TTAssignPeroids
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ttval"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> UpdateAssignedTimetable(TimeTable ttval, string clientId)
         {
             #region Initialize Response

@@ -48,7 +48,7 @@ namespace Transport.Services
                         return Ok(await _transportService.AddBusStops(request, clientId));
 
                     default:
-                        response.Message = "Unsupported actionType.";
+                        response.Message = "Invalid actionType.";
                         return BadRequest(response);
                 }
             }

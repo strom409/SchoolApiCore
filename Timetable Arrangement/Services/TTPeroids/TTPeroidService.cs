@@ -17,6 +17,12 @@ namespace Timetable_Arrangement.Services.TTPeroids
             _configuration = configuration;
             _ttPeroidsNoService = ttPeroidsNoService;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ttval"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> addTTperoidtime(TimeTable ttval, string clientId)
         {
             #region Initialize Response
@@ -85,6 +91,12 @@ namespace Timetable_Arrangement.Services.TTPeroids
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ttval"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> updateTTperoidtime(TimeTable ttval, string clientId)
         {
             #region Initialize Response
@@ -142,6 +154,11 @@ namespace Timetable_Arrangement.Services.TTPeroids
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> Gettimetable(string clientId)
         {
             #region Initialize Response
@@ -213,6 +230,11 @@ INNER JOIN TTPeroidsNo pno ON pno.PID = p.PIDFK";
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> getPeroidNo(string clientId)
         {
             #region Initialize Response
@@ -274,6 +296,11 @@ INNER JOIN TTPeroidsNo pno ON pno.PID = p.PIDFK";
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> getTimeTablePeriodsWithDuration(string clientId)
         {
             #region Initialize Response
@@ -337,6 +364,12 @@ INNER JOIN TTPeroidsNo pno ON pno.PID = p.PIDFK";
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pid"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetPeriodList(string pid, string clientId)
         {
             #region Initialize Response

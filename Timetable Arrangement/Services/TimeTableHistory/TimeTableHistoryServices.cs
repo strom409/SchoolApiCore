@@ -16,7 +16,12 @@ namespace Timetable_Arrangement.Services.TimeTableHistory
             _configuration= configuration;
             _ttPeroidsNoService= ttPeroidsNoService;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="timeTable"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> AddTimeTableTeacherHistory(TimeTableDto timeTable, string clientId)
         {
             var response = new ResponseModel
@@ -102,7 +107,13 @@ namespace Timetable_Arrangement.Services.TimeTableHistory
 
             return response;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="teacherId"></param>
+        /// <param name="dayId"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetTimeTableTeacherHistory(string teacherId, string dayId, string clientId)
         {
             #region Initialize Response

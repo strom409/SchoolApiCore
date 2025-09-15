@@ -10,7 +10,6 @@
         public long ClassID { get; set; }
         public long SectionID { get; set; }
         public long SubjectID { get; set; }
-
         public DateTime OnDate { get; set; }
         public DateTime InsertedOn { get; set; }
         public string InsertedBy { get; set; }

@@ -97,7 +97,7 @@ namespace SchoolApiCore.Controllers
              var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
 
             //  var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
-           // var clientId = "client1";
+        //   var clientId = "client2";
 
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
@@ -212,10 +212,10 @@ namespace SchoolApiCore.Controllers
             {
                 
                 var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level !" };
-              
-                
-                
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+
+                var clientId = "client2";
+
+              //  var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
 
                 if (string.IsNullOrEmpty(clientId))
                     return Unauthorized("ClientId  missing");
@@ -286,57 +286,6 @@ namespace SchoolApiCore.Controllers
                         response = await _studentService.UpdateStudentHeightWeightAdharNamePENEtcUDISE(request, clientId);
                         break;
              
-                    //case 16:
-                    //    try
-                    //    {
-                    //        // Initialize empty updates list
-                    //        var updates = new List<StudentRollNoUpdate>();
-
-                    //        // Handle bulk updates
-                    //        if (request.BulkUpdates != null)
-                    //        {
-                    //            updates = request.BulkUpdates
-                    //                .Where(u => u != null && u.StudentInfoID > 0 && !string.IsNullOrWhiteSpace(u.RollNo))
-                    //                .ToList();
-                    //        }
-                    //        // Handle single update
-                    //        else if (!string.IsNullOrWhiteSpace(request.StudentInfoID) &&
-                    //                int.TryParse(request.StudentInfoID, out var studentId) &&
-                    //                studentId > 0 &&
-                    //                !string.IsNullOrWhiteSpace(request.RollNo))
-                    //        {
-                    //            updates.Add(new StudentRollNoUpdate
-                    //            {
-                    //                StudentInfoID = studentId,
-                    //                RollNo = request.RollNo,
-                    //                UpdatedBy = request.UpdatedBy ?? "System"
-                    //            });
-                    //        }
-
-                    //        if (updates.Count == 0)
-                    //        {
-                    //            response = new ResponseModel
-                    //            {
-                    //                IsSuccess = false,
-                    //                Message = "No valid roll number updates provided"
-                    //            };
-                    //            break;
-                    //        }
-
-                    //        response = await _studentService.UpdateClassStudentRollNumbers(updates, clientId);
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        response = new ResponseModel
-                    //        {
-                    //            IsSuccess = false,
-                    //            Message = $"Roll number update failed: {ex.Message}"
-                    //        };
-                    //        // Log error if needed
-                    //      Student.Repository.Error.ErrorBLL.CreateErrorLog("StudentController", "UpdateRollNumbers", ex.ToString());
-                    //    }
-                    //    break;
-
                     default:
                         response = new ResponseModel
                         {

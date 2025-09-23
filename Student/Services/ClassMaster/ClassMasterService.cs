@@ -209,7 +209,6 @@ namespace Student.Services.ClassMaster
                 c.Current_Session, 
                 c.SessionID, 
                 c.SubDepartmentID, 
-                c.ClassIncharg,
                 ed.DepartmentName
             FROM Classes c
             INNER JOIN EducationalDepartments ed ON c.SubDepartmentID = ed.EduDepartmentID
@@ -236,7 +235,7 @@ namespace Student.Services.ClassMaster
                             Current_Session = row["Current_Session"]?.ToString(),
                             SessionID = row["SessionID"] != DBNull.Value ? Convert.ToInt32(row["SessionID"]) : 0,
                             SubDepartmentID = row["SubDepartmentID"] != DBNull.Value ? Convert.ToInt32(row["SubDepartmentID"]) : 0,
-                            ClassIncharg = row["ClassIncharg"]?.ToString(),
+                        //    ClassIncharg = row["ClassIncharg"]?.ToString(),
                             DepartmentName = row["DepartmentName"]?.ToString()
                         });
                     }

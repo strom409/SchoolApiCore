@@ -19,14 +19,10 @@ namespace Student.Services.Students
     {
 
         private readonly IConfiguration _configuration;
-        private readonly IWebHostEnvironment _env;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public StudentService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env)
+        public StudentService(IConfiguration configuration)
         {
             _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
-            _env = env;
         }
         /// <summary>
         /// 
@@ -211,9 +207,19 @@ namespace Student.Services.Students
     new SqlParameter("@StateID", request.StateID ?? string.Empty),
     new SqlParameter("@StateName", request.StateName ?? string.Empty),
     new SqlParameter("@PrStateID", request.PrStateID ?? string.Empty),
-    new SqlParameter("@PrStateName", request.PrStateName ?? string.Empty)
-
-
+    new SqlParameter("@PrStateName", request.PrStateName ?? string.Empty),
+    new SqlParameter("@Religion", request.Religion ?? string.Empty),
+    new SqlParameter("@MotherTounge", request.MotherTounge ?? string.Empty),
+    new SqlParameter("@BankName", request.BankName ?? string.Empty),
+    new SqlParameter("@AccountNo", request.AccountNo ?? string.Empty),
+    new SqlParameter("@AccountType", request.AccountType ?? string.Empty),
+    new SqlParameter("@IFCCode", request.IFCCode ?? string.Empty),
+  //  new SqlParameter("@Scategory", request.Scategory ?? string.Empty),
+  //  new SqlParameter("@ScategoryID", request.ScategoryID ?? (object)DBNull.Value),
+    new SqlParameter("@BPLStatus", request.BPLStatus ?? (object)DBNull.Value),
+    new SqlParameter("@SDisability", request.SDisability ?? string.Empty),
+    new SqlParameter("@Tehsil", request.Tehsil ?? string.Empty),
+    new SqlParameter("@TehsilPer", request.TehsilPer ?? string.Empty)
 };
 
 
@@ -518,8 +524,6 @@ SELECT
     s.Withdrawnarration,
     s.Detnewadmission,
     s.PhoneNo2,
-    s.pp, s.p, s.m, s.h,
-    s.ppan, s.pan, s.man, s.han,      
     s.Ledgerid, s.landlineno,
     s.FeeRemarks, s.BloodGroup,s.PrDistrictID,
     s.Pincode,
@@ -746,8 +750,6 @@ SELECT
     s.Withdrawnarration,
     s.Detnewadmission,
     s.PhoneNo2,
-    s.pp, s.p, s.m, s.h,
-    s.ppan, s.pan, s.man, s.han,
     s.Ledgerid, s.landlineno,
     s.FeeRemarks, s.BloodGroup,
     s.Pincode, s.SEmail,
@@ -757,7 +759,16 @@ SELECT
     s.DistrictID, s.StudentCatID, s.DistrictName, s.StudentCatName,
     s.Scategory, s.ScategoryID, s.categoryID, s.category,
     s.HID, 
-    s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR,
+    s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR, s.Religion,
+    s.MotherTounge,
+    s.BankName,
+    s.AccountNo,
+    s.AccountType,
+    s.IFCCode,
+    s.BPLStatus,
+    s.SDisability,
+    s.Tehsil,
+    s.TehsilPer,
     si.StudentInfoID,
     si.RollNo,
     si.PhotoPath,
@@ -863,11 +874,11 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         MiddleBoardNo = row["MiddleBoardNo"]?.ToString(),
                         PrePrimaryBoardNo = row["PrePrimaryBoardNo"]?.ToString(),
                         HigherBoardNo = row["HigherBoardNo"]?.ToString(),
-                        PrimaryDate = row["PrimaryDate"]?.ToString(),
-                        HighDate = row["HighDate"]?.ToString(),
-                        MiddleDate = row["MiddleDate"]?.ToString(),
-                        PrePrimaryDate = row["PrePrimaryDate"]?.ToString(),
-                        HigherDate = row["HigherDate"]?.ToString(),
+                        PrimaryDate = row["PrimaryDate"] != DBNull.Value ? Convert.ToDateTime(row["PrimaryDate"]).ToString("yyyy-MM-dd") : null,
+                        HighDate = row["HighDate"] != DBNull.Value ? Convert.ToDateTime(row["HighDate"]).ToString("yyyy-MM-dd") : null,
+                        MiddleDate = row["MiddleDate"] != DBNull.Value ? Convert.ToDateTime(row["MiddleDate"]).ToString("yyyy-MM-dd") : null,
+                        PrePrimaryDate = row["PrePrimaryDate"] != DBNull.Value ? Convert.ToDateTime(row["PrePrimaryDate"]).ToString("yyyy-MM-dd") : null,
+                        HigherDate = row["HigherDate"] != DBNull.Value ? Convert.ToDateTime(row["HigherDate"]).ToString("yyyy-MM-dd") : null,
                         Session = row["Current_Session"]?.ToString(),
                         HID = row["HID"]?.ToString(),
                         PEN = row["PEN"]?.ToString(),
@@ -875,6 +886,16 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         Height = row["Height"]?.ToString(),
                         NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
                         DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
+                        Religion = row["Religion"]?.ToString(),
+                        MotherTounge = row["MotherTounge"]?.ToString(), // Note: DB column "MotherTounge"
+                        BankName = row["BankName"]?.ToString(),
+                        AccountNo = row["AccountNo"]?.ToString(),
+                        AccountType = row["AccountType"]?.ToString(),
+                        IFCCode = row["IFCCode"]?.ToString(),
+                        BPLStatus = row["BPLStatus"] != DBNull.Value ? Convert.ToInt32(row["BPLStatus"]) : (int?)null,
+                        SDisability = row["SDisability"]?.ToString(),
+                        Tehsil = row["Tehsil"]?.ToString(),
+                        TehsilPer = row["TehsilPer"]?.ToString(),
                         PrDistrictID = row["PrDistrictID"]?.ToString(),
                     };
 
@@ -962,8 +983,6 @@ WHERE s.AdmissionNo = @AdmissionNo";
                 s.Withdrawnarration,
                 s.Detnewadmission,
                 s.PhoneNo2,
-                s.pp, s.p, s.m, s.h,
-                s.ppan, s.pan, s.man, s.han,
                 s.Ledgerid, s.landlineno,
                 s.FeeRemarks, s.BloodGroup,
                 s.Pincode, s.SEmail,s.PrDistrictID,
@@ -973,7 +992,16 @@ WHERE s.AdmissionNo = @AdmissionNo";
                 s.DistrictID, s.StudentCatID, s.DistrictName, s.StudentCatName,
                 s.Scategory, s.ScategoryID, s.categoryID, s.category,
                 s.HID, 
-                s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR,
+                s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR, s.Religion,
+                s.MotherTounge,
+                s.BankName,
+                s.AccountNo,
+                s.AccountType,
+                s.IFCCode,
+                s.BPLStatus,
+                s.SDisability,
+                s.Tehsil,
+                s.TehsilPer,
                 si.StudentInfoID,
                 si.RollNo,
                 si.PhotoPath,
@@ -1083,11 +1111,11 @@ WHERE s.AdmissionNo = @AdmissionNo";
                             MiddleBoardNo = row["MiddleBoardNo"]?.ToString(),
                             PrePrimaryBoardNo = row["PrePrimaryBoardNo"]?.ToString(),
                             HigherBoardNo = row["HigherBoardNo"]?.ToString(),
-                            PrimaryDate = row["PrimaryDate"]?.ToString(),
-                            HighDate = row["HighDate"]?.ToString(),
-                            MiddleDate = row["MiddleDate"]?.ToString(),
-                            PrePrimaryDate = row["PrePrimaryDate"]?.ToString(),
-                            HigherDate = row["HigherDate"]?.ToString(),
+                            PrimaryDate = row["PrimaryDate"] != DBNull.Value ? Convert.ToDateTime(row["PrimaryDate"]).ToString("yyyy-MM-dd") : null,
+                            HighDate = row["HighDate"] != DBNull.Value ? Convert.ToDateTime(row["HighDate"]).ToString("yyyy-MM-dd") : null,
+                            MiddleDate = row["MiddleDate"] != DBNull.Value ? Convert.ToDateTime(row["MiddleDate"]).ToString("yyyy-MM-dd") : null,
+                            PrePrimaryDate = row["PrePrimaryDate"] != DBNull.Value ? Convert.ToDateTime(row["PrePrimaryDate"]).ToString("yyyy-MM-dd") : null,
+                            HigherDate = row["HigherDate"] != DBNull.Value ? Convert.ToDateTime(row["HigherDate"]).ToString("yyyy-MM-dd") : null,
                             Session = row["Current_Session"]?.ToString(),
                             HID = row["HID"]?.ToString(),
                             PEN = row["PEN"]?.ToString(),
@@ -1095,6 +1123,16 @@ WHERE s.AdmissionNo = @AdmissionNo";
                             Height = row["Height"]?.ToString(),
                             NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
                             DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
+                            Religion = row["Religion"]?.ToString(),
+                            MotherTounge = row["MotherTounge"]?.ToString(), // Note: DB column "MotherTounge"
+                            BankName = row["BankName"]?.ToString(),
+                            AccountNo = row["AccountNo"]?.ToString(),
+                            AccountType = row["AccountType"]?.ToString(),
+                            IFCCode = row["IFCCode"]?.ToString(),
+                            BPLStatus = row["BPLStatus"] != DBNull.Value ? Convert.ToInt32(row["BPLStatus"]) : (int?)null,
+                            SDisability = row["SDisability"]?.ToString(),
+                            Tehsil = row["Tehsil"]?.ToString(),
+                            TehsilPer = row["TehsilPer"]?.ToString(),
                             PrDistrictID = row["PrDistrictID"]?.ToString(),
                         };
                         students.Add(student);
@@ -1138,7 +1176,6 @@ WHERE s.AdmissionNo = @AdmissionNo";
             #endregion
 
             #region Get Connection String
-
             var connectionStringHelper = new ConnectionStringHelper(_configuration);
             string connectionString = connectionStringHelper.GetConnectionString(clientId);
 
@@ -1147,7 +1184,7 @@ WHERE s.AdmissionNo = @AdmissionNo";
                 response.IsSuccess = false;
                 response.Status = 0;
                 response.Message = "Invalid client ID.";
-                response.ResponseData = null; // Assuming you have a Data property of type object
+                response.ResponseData = null;
                 return response;
             }
             #endregion
@@ -1184,8 +1221,6 @@ WHERE s.AdmissionNo = @AdmissionNo";
             s.Detnewadmission,
             s.PhoneNo2,
             s.PrDistrictID,
-            s.pp, s.p, s.m, s.h,
-            s.ppan, s.pan, s.man, s.han,
             s.Ledgerid, s.landlineno,
             s.FeeRemarks, s.BloodGroup,
             s.Pincode, s.SEmail,
@@ -1195,7 +1230,16 @@ WHERE s.AdmissionNo = @AdmissionNo";
             s.DistrictID, s.StudentCatID, s.DistrictName, s.StudentCatName,
             s.Scategory, s.ScategoryID, s.categoryID, s.category,s.StateID ,s.StateName ,s.PrStateID,s.PrStateName,
             s.HID, 
-            s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR,
+            s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR,s.Religion,
+            s.MotherTounge,
+            s.BankName,
+            s.AccountNo,
+            s.AccountType,
+            s.IFCCode,
+            s.BPLStatus,
+            s.SDisability,
+            s.Tehsil,
+            s.TehsilPer,
             si.StudentInfoID,
             si.RollNo,
             si.PhotoPath,
@@ -1225,7 +1269,7 @@ WHERE s.AdmissionNo = @AdmissionNo";
         WHERE si.StudentInfoID = @StudentInfoID";
             #endregion
 
-            #region Execute Query
+
             var parameters = new List<SqlParameter>
     {
         new SqlParameter("@StudentInfoID", studentInfoId)
@@ -1234,21 +1278,30 @@ WHERE s.AdmissionNo = @AdmissionNo";
             try
             {
                 DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, query, parameters.ToArray());
+
+                #region Helper for Safe Date
+                string SafeDate(object dbValue)
+                {
+                    if (dbValue == DBNull.Value || string.IsNullOrWhiteSpace(dbValue?.ToString()))
+                        return null;
+
+                    return DateTime.TryParse(dbValue.ToString(), out var dt) ? dt.ToString("yyyy-MM-dd") : null;
+                }
                 #endregion
 
                 #region Map Data to DTO
-
                 if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
                 {
                     DataRow row = ds.Tables[0].Rows[0];
+
                     var student = new StudentDTO
                     {
                         StudentID = row["StudentID"]?.ToString(),
                         StudentInfoID = row["StudentInfoID"]?.ToString(),
                         AdmissionNo = row["AdmissionNo"]?.ToString(),
                         StudentName = row["StudentName"]?.ToString(),
-                        DOB = row["DOB"] != DBNull.Value ? Convert.ToDateTime(row["DOB"]).ToString("yyyy-MM-dd") : null,
-                        DOA = row["BOA"] != DBNull.Value ? Convert.ToDateTime(row["BOA"]).ToString("yyyy-MM-dd") : null,
+                        DOB = SafeDate(row["DOB"]),
+                        DOA = SafeDate(row["BOA"]),
                         FatherName = row["FathersName"]?.ToString(),
                         FatherQualification = row["FathersQualification"]?.ToString(),
                         FatherOccupation = row["FathersJob"]?.ToString(),
@@ -1266,8 +1319,8 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         Gender = row["Gender"]?.ToString(),
                         Discharged = row["Discharged"]?.ToString(),
                         DSession = row["DSession"]?.ToString(),
-                        DDate = row["DDate"] != DBNull.Value ? Convert.ToDateTime(row["DDate"]).ToString("yyyy-MM-dd") : null,
-                        DRemarks = DischargeStatus(row["IsDischarged"].ToString()),
+                        DDate = SafeDate(row["DDate"]),
+                        DRemarks = DischargeStatus(row["IsDischarged"]?.ToString()),
                         DBy = row["DBy"]?.ToString(),
                         IsDischarged = row["IsDischarged"]?.ToString(),
                         SEmail = row["SEmail"]?.ToString(),
@@ -1279,7 +1332,6 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         ClassID = row["ClassID"]?.ToString(),
                         SectionID = row["SessionID"]?.ToString(),
                         RollNo = row["RollNo"]?.ToString(),
-                        //PhotoPath = row["PhotoPath"]?.ToString(),
                         Remarks = row["Remarks"]?.ToString(),
                         RouteID = row["RouteID"]?.ToString(),
                         AcademicNo = row["AcademicNo"]?.ToString(),
@@ -1293,27 +1345,35 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         GuardialAccupation = row["GuardialAccupation"]?.ToString(),
                         DistrictID = row["DistrictID"]?.ToString(),
                         DistrictName = row["DistrictName"]?.ToString(),
-                        StudentCatID = row["StudentCatID"]?.ToString(),
-                        StudentCatName = row["StudentCatName"]?.ToString(),
+                        StudentCatID = row["ScategoryID"]?.ToString(),
+                        StudentCatName = row["Scategory"]?.ToString(),
                         PrimaryBoardNo = row["PrimaryBoardNo"]?.ToString(),
                         HighBoardNo = row["HighBoardNo"]?.ToString(),
                         MiddleBoardNo = row["MiddleBoardNo"]?.ToString(),
                         PrePrimaryBoardNo = row["PrePrimaryBoardNo"]?.ToString(),
                         HigherBoardNo = row["HigherBoardNo"]?.ToString(),
-                        PrimaryDate = row["PrimaryDate"]?.ToString(),
-                        HighDate = row["HighDate"]?.ToString(),
-                        MiddleDate = row["MiddleDate"]?.ToString(),
-                        PrePrimaryDate = row["PrePrimaryDate"] != DBNull.Value
-                       ? Convert.ToDateTime(row["PrePrimaryDate"]).ToString("yyyy-MM-dd"): null,
-                        HigherDate = row["HigherDate"]?.ToString(),
+                        PrimaryDate = SafeDate(row["PrimaryDate"]),
+                        HighDate = SafeDate(row["HighDate"]),
+                        MiddleDate = SafeDate(row["MiddleDate"]),
+                        PrePrimaryDate = SafeDate(row["PrePrimaryDate"]),
+                        HigherDate = SafeDate(row["HigherDate"]),
                         Session = row["Current_Session"]?.ToString(),
                         HID = row["HID"]?.ToString(),
                         PEN = row["PEN"]?.ToString(),
                         WEIGHT = row["WEIGHT"]?.ToString(),
                         Height = row["Height"]?.ToString(),
                         NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
-                        DOBASPERADHAAR = row["DOBASPERADHAAR"] != DBNull.Value
-                         ? Convert.ToDateTime(row["DOBASPERADHAAR"]).ToString("yyyy-MM-dd"): null,
+                        DOBASPERADHAAR = SafeDate(row["DOBASPERADHAAR"]),
+                        Religion = row["Religion"]?.ToString(),
+                        MotherTounge = row["MotherTounge"]?.ToString(),
+                        BankName = row["BankName"]?.ToString(),
+                        AccountNo = row["AccountNo"]?.ToString(),
+                        AccountType = row["AccountType"]?.ToString(),
+                        IFCCode = row["IFCCode"]?.ToString(),
+                        BPLStatus = row["BPLStatus"] != DBNull.Value ? Convert.ToInt32(row["BPLStatus"]) : (int?)null,
+                        SDisability = row["SDisability"]?.ToString(),
+                        Tehsil = row["Tehsil"]?.ToString(),
+                        TehsilPer = row["TehsilPer"]?.ToString(),
                         Apaarid = row["APAARSTUDENTID"]?.ToString(),
                         HouseName = row["HouseName"]?.ToString(),
                         PrPincode = row["PrPincode"]?.ToString(),
@@ -1323,17 +1383,14 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         StateName = row["StateName"]?.ToString(),
                         PrStateID = row["PrStateID"]?.ToString(),
                         PrStateName = row["PrStateName"]?.ToString()
-
                     };
-
 
                     response.IsSuccess = true;
                     response.Status = 1;
                     response.Message = "Student details fetched successfully.";
-                    response.ResponseData = student; // Set Data property here
+                    response.ResponseData = student;
                 }
                 #endregion
-
             }
             catch (Exception ex)
             {
@@ -1347,6 +1404,225 @@ WHERE s.AdmissionNo = @AdmissionNo";
 
             return response;
         }
+
+        //    public async Task<ResponseModel> GetStudentByStudentInfoId(long studentInfoId, string clientId)
+        //    {
+        //        #region Initialize Response
+        //        var response = new ResponseModel
+        //        {
+        //            IsSuccess = true,
+        //            Message = "No Records Found!",
+        //            Status = 0
+        //        };
+        //        #endregion
+
+        //        #region Get Connection String
+
+        //        var connectionStringHelper = new ConnectionStringHelper(_configuration);
+        //        string connectionString = connectionStringHelper.GetConnectionString(clientId);
+
+        //        if (string.IsNullOrEmpty(connectionString))
+        //        {
+        //            response.IsSuccess = false;
+        //            response.Status = 0;
+        //            response.Message = "Invalid client ID.";
+        //            response.ResponseData = null; // Assuming you have a Data property of type object
+        //            return response;
+        //        }
+        //        #endregion
+
+        //        #region SQL Query
+        //        string query = @"
+        //    SELECT 
+        //        s.StudentID,
+        //        s.AdmissionNo,
+        //        dbo.AcademicNo(si.Current_Session, s.StudentID, c.SubDepartmentID) AS AcademicNo,
+        //        s.StudentName,
+        //        s.APAARSTUDENTID,
+        //        s.HouseName,
+        //        s.DOB,
+        //        s.BOA,
+        //        s.PrPincode, 
+        //        s.PrDistrict,
+        //        s.FathersName,
+        //        s.FathersQualification,
+        //        s.FathersJob,
+        //        s.MothersName,
+        //        s.MothersQualification,
+        //        s.MothersJob,
+        //        s.PresentAddress,
+        //        s.PerminantAddress,
+        //        s.SessionOfAdmission,
+        //        s.PhoneNo,
+        //        s.Gender,
+        //        s.Discharged,
+        //        s.TransportFee,
+        //        s.StudentFeeRebate,
+        //        s.WithdrawDate,
+        //        s.Withdrawnarration,
+        //        s.Detnewadmission,
+        //        s.PhoneNo2,
+        //        s.PrDistrictID,
+        //        s.Ledgerid, s.landlineno,
+        //        s.FeeRemarks, s.BloodGroup,
+        //        s.Pincode, s.SEmail,
+        //        s.Saadhaarcard, s.Faadhaarcard, s.Maadhaarcard,
+        //        s.UID, s.Fphn, s.Mphn,
+        //        s.GuardianName, s.GuardianPhoneNo, s.GuardianQualification, s.GuardialAccupation,
+        //        s.DistrictID, s.StudentCatID, s.DistrictName, s.StudentCatName,
+        //        s.Scategory, s.ScategoryID, s.categoryID, s.category,s.StateID ,s.StateName ,s.PrStateID,s.PrStateName,
+        //        s.HID, 
+        //        s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR,
+        //        si.StudentInfoID,
+        //        si.RollNo,
+        //        si.PhotoPath,
+        //        si.ClassID,
+        //        si.Current_Session,
+        //        si.RouteID,
+        //        si.BusStopID,
+        //        si.SessionID,
+        //        si.Remarks,
+        //        si.BoardNo, si.PrePrimaryBoardNo, si.PrePrimaryDate,
+        //        si.PrimaryBoardNo, si.PrimaryDate,
+        //        si.MiddleBoardNo, si.MiddleDate,
+        //        si.HighBoardNo, si.HighDate,
+        //        si.HigherBoardNo, si.HigherDate,
+        //        si.IsDischarged, si.DSession, si.DDate, si.DRemarks, si.DBy,
+        //        c.ClassName,
+        //        se.SectionName,
+        //        bs.BusStop,
+        //        bs.BusRate,
+        //        t.RouteName
+        //    FROM Students s
+        //    INNER JOIN StudentInfo si ON s.StudentID = si.StudentId
+        //    INNER JOIN Classes c ON si.ClassID = c.ClassID
+        //    LEFT JOIN Sections se ON si.SectionID = se.SectionID
+        //    LEFT JOIN Transport t ON t.RouteID = si.RouteID
+        //    LEFT JOIN BusStops bs ON bs.BusStopID = si.BusStopID
+        //    WHERE si.StudentInfoID = @StudentInfoID";
+        //        #endregion
+
+        //        #region Execute Query
+        //        var parameters = new List<SqlParameter>
+        //{
+        //    new SqlParameter("@StudentInfoID", studentInfoId)
+        //};
+
+        //        try
+        //        {
+        //            DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, query, parameters.ToArray());
+        //            #endregion
+
+        //            #region Map Data to DTO
+
+        //            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        //            {
+        //                DataRow row = ds.Tables[0].Rows[0];
+        //                var student = new StudentDTO
+        //                {
+        //                    StudentID = row["StudentID"]?.ToString(),
+        //                    StudentInfoID = row["StudentInfoID"]?.ToString(),
+        //                    AdmissionNo = row["AdmissionNo"]?.ToString(),
+        //                    StudentName = row["StudentName"]?.ToString(),
+        //                    DOB = row["DOB"] != DBNull.Value ? Convert.ToDateTime(row["DOB"]).ToString("yyyy-MM-dd") : null,
+        //                    DOA = row["BOA"] != DBNull.Value ? Convert.ToDateTime(row["BOA"]).ToString("yyyy-MM-dd") : null,
+        //                    FatherName = row["FathersName"]?.ToString(),
+        //                    FatherQualification = row["FathersQualification"]?.ToString(),
+        //                    FatherOccupation = row["FathersJob"]?.ToString(),
+        //                    MotherQualification = row["MothersQualification"]?.ToString(),
+        //                    MotherOccupation = row["MothersJob"]?.ToString(),
+        //                    MontherName = row["MothersName"]?.ToString(),
+        //                    MobileFather = row["Fphn"]?.ToString(),
+        //                    MobileMother = row["Mphn"]?.ToString(),
+        //                    LandLineNo = row["landlineno"]?.ToString(),
+        //                    ClassName = row["ClassName"]?.ToString(),
+        //                    SectionName = row["SectionName"]?.ToString(),
+        //                    PresentAddress = row["PresentAddress"]?.ToString(),
+        //                    PermanentAddress = row["PerminantAddress"]?.ToString(),
+        //                    SessionOfAdmission = row["SessionOfAdmission"]?.ToString(),
+        //                    Gender = row["Gender"]?.ToString(),
+        //                    Discharged = row["Discharged"]?.ToString(),
+        //                    DSession = row["DSession"]?.ToString(),
+        //                    DDate = row["DDate"] != DBNull.Value ? Convert.ToDateTime(row["DDate"]).ToString("yyyy-MM-dd") : null,
+        //                    DRemarks = DischargeStatus(row["IsDischarged"].ToString()),
+        //                    DBy = row["DBy"]?.ToString(),
+        //                    IsDischarged = row["IsDischarged"]?.ToString(),
+        //                    SEmail = row["SEmail"]?.ToString(),
+        //                    BloodGroup = row["BloodGroup"]?.ToString(),
+        //                    PinCode = row["Pincode"]?.ToString(),
+        //                    Aadhaar = row["Saadhaarcard"]?.ToString(),
+        //                    FAdhaar = row["Faadhaarcard"]?.ToString(),
+        //                    MAdhaar = row["Maadhaarcard"]?.ToString(),
+        //                    ClassID = row["ClassID"]?.ToString(),
+        //                    SectionID = row["SessionID"]?.ToString(),
+        //                    RollNo = row["RollNo"]?.ToString(),
+        //                    PhotoPath = row["PhotoPath"]?.ToString(),
+        //                    Remarks = row["Remarks"]?.ToString(),
+        //                    RouteID = row["RouteID"]?.ToString(),
+        //                    AcademicNo = row["AcademicNo"]?.ToString(),
+        //                    busstopid = row["BusStopID"]?.ToString(),
+        //                    RouteName = row["RouteName"]?.ToString(),
+        //                    BusStopName = row["BusStop"]?.ToString(),
+        //                    BusFee = row["BusRate"]?.ToString(),
+        //                    GuardianName = row["GuardianName"]?.ToString(),
+        //                    GuardianPhoneNo = row["GuardianPhoneNo"]?.ToString(),
+        //                    GuardianQualification = row["GuardianQualification"]?.ToString(),
+        //                    GuardialAccupation = row["GuardialAccupation"]?.ToString(),
+        //                    DistrictID = row["DistrictID"]?.ToString(),
+        //                    DistrictName = row["DistrictName"]?.ToString(),
+        //                    StudentCatID = row["StudentCatID"]?.ToString(),
+        //                    StudentCatName = row["StudentCatName"]?.ToString(),
+        //                    PrimaryBoardNo = row["PrimaryBoardNo"]?.ToString(),
+        //                    HighBoardNo = row["HighBoardNo"]?.ToString(),
+        //                    MiddleBoardNo = row["MiddleBoardNo"]?.ToString(),
+        //                    PrePrimaryBoardNo = row["PrePrimaryBoardNo"]?.ToString(),
+        //                    HigherBoardNo = row["HigherBoardNo"]?.ToString(),
+        //                    PrimaryDate = row["PrimaryDate"] != DBNull.Value ? Convert.ToDateTime(row["PrimaryDate"]).ToString("yyyy-MM-dd") : null,
+        //                    HighDate = row["HighDate"] != DBNull.Value ? Convert.ToDateTime(row["HighDate"]).ToString("yyyy-MM-dd") : null,
+        //                    MiddleDate = row["MiddleDate"] != DBNull.Value ? Convert.ToDateTime(row["MiddleDate"]).ToString("yyyy-MM-dd") : null,
+        //                    PrePrimaryDate = row["PrePrimaryDate"] != DBNull.Value ? Convert.ToDateTime(row["PrePrimaryDate"]).ToString("yyyy-MM-dd") : null,
+        //                    HigherDate = row["HigherDate"] != DBNull.Value ? Convert.ToDateTime(row["HigherDate"]).ToString("yyyy-MM-dd") : null,
+        //                    Session = row["Current_Session"]?.ToString(),
+        //                    HID = row["HID"]?.ToString(),
+        //                    PEN = row["PEN"]?.ToString(),
+        //                    WEIGHT = row["WEIGHT"]?.ToString(),
+        //                    Height = row["Height"]?.ToString(),
+        //                    NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+        //                    DOBASPERADHAAR = row["DOBASPERADHAAR"] != DBNull.Value
+        //                     ? Convert.ToDateTime(row["DOBASPERADHAAR"]).ToString("yyyy-MM-dd") : null,
+        //                    Apaarid = row["APAARSTUDENTID"]?.ToString(),
+        //                    HouseName = row["HouseName"]?.ToString(),
+        //                    PrPincode = row["PrPincode"]?.ToString(),
+        //                    PrDistrict = row["PrDistrict"]?.ToString(),
+        //                    PrDistrictID = row["PrDistrictID"]?.ToString(),
+        //                    StateID = row["StateID"]?.ToString(),
+        //                    StateName = row["StateName"]?.ToString(),
+        //                    PrStateID = row["PrStateID"]?.ToString(),
+        //                    PrStateName = row["PrStateName"]?.ToString()
+
+        //                };
+
+
+        //                response.IsSuccess = true;
+        //                response.Status = 1;
+        //                response.Message = "Student details fetched successfully.";
+        //                response.ResponseData = student; // Set Data property here
+        //            }
+        //            #endregion
+
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Repository.Error.ErrorBLL.CreateErrorLog("StudentService", "GetStudentByStudentInfoId", ex.Message + " | " + ex.StackTrace);
+
+        //            response.IsSuccess = false;
+        //            response.Status = 0;
+        //            response.Message = "An error occurred while fetching student details.";
+        //            response.ResponseData = null;
+        //        }
+
+        //        return response;
+        //    }
         /// <summary>
         /// 
         /// </summary>
@@ -1412,8 +1688,6 @@ dbo.AcademicNo(si.Current_Session,
     s.Withdrawnarration,
     s.Detnewadmission,
     s.PhoneNo2,
-    s.pp, s.p, s.m, s.h,
-    s.ppan, s.pan, s.man, s.han,
     s.Ledgerid, s.landlineno,
     s.FeeRemarks, s.BloodGroup,
     s.Pincode, s.SEmail,
@@ -1423,7 +1697,8 @@ dbo.AcademicNo(si.Current_Session,
     s.DistrictID, s.StudentCatID, s.DistrictName, s.StudentCatName,
     s.Scategory, s.ScategoryID, s.categoryID, s.category,
     s.HID, s.PrDistrictID,
-    s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR,
+    s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR,s.Religion, s.MotherTounge, s.BankName, s.AccountNo,
+    s.AccountType, s.IFCCode, s.BPLStatus, s.SDisability, s.Tehsil, s.TehsilPer,
     si.StudentInfoID,
     si.RollNo,
     si.PhotoPath,
@@ -1542,6 +1817,16 @@ WHERE s.PhoneNo = @PhoneNo";
                         Height = row["Height"]?.ToString(),
                         NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
                         DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
+                        Religion = row["Religion"]?.ToString(),
+                        MotherTounge = row["MotherTounge"]?.ToString(), // Note: DB column "MotherTounge"
+                        BankName = row["BankName"]?.ToString(),
+                        AccountNo = row["AccountNo"]?.ToString(),
+                        AccountType = row["AccountType"]?.ToString(),
+                        IFCCode = row["IFCCode"]?.ToString(),
+                        BPLStatus = row["BPLStatus"] != DBNull.Value ? Convert.ToInt32(row["BPLStatus"]) : (int?)null,
+                        SDisability = row["SDisability"]?.ToString(),
+                        Tehsil = row["Tehsil"]?.ToString(),
+                        TehsilPer = row["TehsilPer"]?.ToString(),
                         PrDistrictID = row["PrDistrictID"]?.ToString(),
                     };
 
@@ -1627,8 +1912,7 @@ SELECT
     s.Withdrawnarration,
     s.Detnewadmission,
     s.PhoneNo2,
-    s.pp, s.p, s.m, s.h,
-    s.ppan, s.pan, s.man, s.han,s.PrDistrictID,
+    s.PrDistrictID,
     s.Ledgerid, s.landlineno,
     s.FeeRemarks, s.BloodGroup,
     s.Pincode, s.SEmail,
@@ -1638,7 +1922,9 @@ SELECT
     s.DistrictID, s.StudentCatID, s.DistrictName, s.StudentCatName,
     s.Scategory, s.ScategoryID, s.categoryID, s.category,
     s.HID, 
-    s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR,
+    s.PEN, s.WEIGHT, s.Height, s.NAMEASPERADHAAR, s.DOBASPERADHAAR,s.Religion, s.MotherTounge,
+     s.BankName, s.AccountNo, s.AccountType, s.IFCCode,
+    s.BPLStatus, s.SDisability, s.Tehsil, s.TehsilPer,
     si.StudentInfoID,
     si.RollNo,
     si.PhotoPath,
@@ -1756,6 +2042,16 @@ WHERE si.Current_Session = @CurrentSession";
                             Height = row["Height"]?.ToString(),
                             NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
                             DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
+                            Religion = row["Religion"]?.ToString(),
+                            MotherTounge = row["MotherTounge"]?.ToString(), // Note: DB column "MotherTounge"
+                            BankName = row["BankName"]?.ToString(),
+                            AccountNo = row["AccountNo"]?.ToString(),
+                            AccountType = row["AccountType"]?.ToString(),
+                            IFCCode = row["IFCCode"]?.ToString(),
+                            BPLStatus = row["BPLStatus"] != DBNull.Value ? Convert.ToInt32(row["BPLStatus"]) : (int?)null,
+                            SDisability = row["SDisability"]?.ToString(),
+                            Tehsil = row["Tehsil"]?.ToString(),
+                            TehsilPer = row["TehsilPer"]?.ToString(),
                             PrDistrictID = row["PrDistrictID"]?.ToString(),
                         };
 
@@ -1861,6 +2157,16 @@ SELECT
     Maadhaarcard,
     SEmail,
     BloodGroup,
+    Religion,
+    MotherTounge,
+    BankName,
+    AccountNo,
+    AccountType,
+    IFCCode,
+    BPLStatus,
+    SDisability,
+    Tehsil,
+    TehsilPer,
     Pincode,
     StudentInfo.ClassID,
     StudentInfo.SectionID,
@@ -1993,6 +2299,16 @@ ORDER BY StudentInfo.ClassID, StudentInfo.SectionID, Rollno;
                         PrDistrictID = dr["PrDistrictID"]?.ToString(),
                         DRemarks = DischargeStatus(dr["IsDischarged"].ToString()),
                         DistrictName = dr["DistrictName"].ToString(),
+                        Religion = dr["Religion"]?.ToString(),
+                        MotherTounge = dr["MotherTounge"]?.ToString(), // Note: DB column "MotherTounge"
+                        BankName = dr["BankName"]?.ToString(),
+                        AccountNo = dr["AccountNo"]?.ToString(),
+                        AccountType = dr["AccountType"]?.ToString(),
+                        IFCCode = dr["IFCCode"]?.ToString(),
+                        BPLStatus = dr["BPLStatus"] != DBNull.Value ? Convert.ToInt32(dr["BPLStatus"]) : (int?)null,
+                        SDisability = dr["SDisability"]?.ToString(),
+                        Tehsil = dr["Tehsil"]?.ToString(),
+                        TehsilPer = dr["TehsilPer"]?.ToString()
                     };
 
                     students.Add(student);
@@ -2404,8 +2720,13 @@ ORDER BY
                             HouseName = reader["HouseName"]?.ToString(),
                             PrPincode = reader["PrPincode"]?.ToString(),
                             PrDistrict = reader["PrDistrict"]?.ToString(),
-                            DOB = reader["DOB"] != DBNull.Value ? Convert.ToDateTime(reader["DOB"]).ToString("dd-MM-yyyy") : string.Empty,
-                            DOA = reader["BOA"] != DBNull.Value ? Convert.ToDateTime(reader["BOA"]).ToString("dd-MM-yyyy") : string.Empty,
+                            DOB = (reader["DOB"] != DBNull.Value && !string.IsNullOrWhiteSpace(reader["DOB"].ToString()))
+        ? Convert.ToDateTime(reader["DOB"]).ToString("dd-MM-yyyy")
+        : string.Empty,
+
+                            DOA = (reader["BOA"] != DBNull.Value && !string.IsNullOrWhiteSpace(reader["BOA"].ToString()))
+        ? Convert.ToDateTime(reader["BOA"]).ToString("dd-MM-yyyy")
+        : string.Empty,
                             PhotoPath = reader["PhotoPath"]?.ToString() ?? "",
                             Aadhaar = reader["Saadhaarcard"]?.ToString() ?? "",
                             SEmail = reader["SEmail"]?.ToString() ?? "",
@@ -2445,7 +2766,9 @@ ORDER BY
                             DRemarks = reader["DRemarks"]?.ToString() ?? "",
                             DBy = reader["DBy"].ToString(),
                             DSession = reader["DSession"].ToString(),
-                            DDate = reader["DDate"] != DBNull.Value ? Convert.ToDateTime(reader["DDate"]).ToString("dd-MM-yyyy") : null,
+                            DDate = (reader["DDate"] != DBNull.Value && !string.IsNullOrWhiteSpace(reader["DDate"].ToString()))
+        ? Convert.ToDateTime(reader["DDate"]).ToString("dd-MM-yyyy")
+        : string.Empty,
 
                             GuardianName = reader["GuardianName"].ToString(),
                             GuardialAccupation = reader["GuardialAccupation"].ToString(),
@@ -2461,7 +2784,10 @@ ORDER BY
                             Height = reader["Height"].ToString(),
                             WEIGHT = reader["WEIGHT"].ToString(),
                             NAMEASPERADHAAR = reader["NAMEASPERADHAAR"].ToString(),
-                            DOBASPERADHAAR = reader["DOBASPERADHAAR"] != DBNull.Value ? Convert.ToDateTime(reader["DOBASPERADHAAR"]).ToString("dd-MM-yyyy") : string.Empty,
+
+                            DOBASPERADHAAR = (reader["DOBASPERADHAAR"] != DBNull.Value && !string.IsNullOrWhiteSpace(reader["DOBASPERADHAAR"].ToString()))
+        ? Convert.ToDateTime(reader["DOBASPERADHAAR"]).ToString("dd-MM-yyyy")
+        : string.Empty,
 
                             BloodGroup = reader["BloodGroup"].ToString(),
                             BusStopName = reader["BusStop"].ToString(),
@@ -2799,7 +3125,7 @@ ORDER BY
                 #endregion
 
                 #region Execute Stored Procedure
-                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.StoredProcedure, "TotalStudentsRollForDashBoardAPI", param);
+                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.StoredProcedure, "SDb_TotalStudentsRollForAPI", param);
                 #endregion
 
                 #region Process Result
@@ -2856,7 +3182,7 @@ ORDER BY
                 #endregion
 
                 #region Execute Stored Procedure
-                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.StoredProcedure, "ClassWiseStudentsRollForDashBoardAPI", param);
+                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.StoredProcedure, "CWS_RollForDashBoardAPI", param);
                 #endregion
 
                 #region Map Data to DTO
@@ -3017,7 +3343,7 @@ ORDER BY
                 #endregion
 
                 #region Execute Stored Procedure
-                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.StoredProcedure, "SectionWiseStudentsRollAndAttendanceForDashBoardAPI", param);
+                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.StoredProcedure, "SWS_RollAndAttendanceForDashBoardAPI", param);
                 #endregion
 
                 #region Map Data to DTO
@@ -3383,6 +3709,15 @@ ORDER BY RollNo";
         new SqlParameter("@GuardianPhoneNo", request.GuardianPhoneNo ?? string.Empty),
         new SqlParameter("@GuardianQualification", request.GuardianQualification ?? string.Empty),
         new SqlParameter("@GuardialAccupation", request.GuardialAccupation ?? string.Empty),
+        new SqlParameter("@Religion", request.Religion ?? string.Empty),
+        new SqlParameter("@MotherTounge", request.MotherTounge ?? string.Empty),
+        new SqlParameter("@BankName", request.BankName ?? string.Empty),
+        new SqlParameter("@AccountNo", request.AccountNo ?? string.Empty),
+        new SqlParameter("@AccountType", request.AccountType ?? string.Empty),
+        new SqlParameter("@IFCCode", request.IFCCode ?? string.Empty),
+        new SqlParameter("@BPLStatus", (object?)request.BPLStatus ?? DBNull.Value),
+        new SqlParameter("@SDisability", request.SDisability ?? string.Empty),
+        new SqlParameter("@APAARStudentID ", request.Apaarid ?? string.Empty),
         new SqlParameter("@UpdatedType", (object?)request.UpdateType ?? DBNull.Value)
     };
             #endregion
@@ -3640,7 +3975,9 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
     new SqlParameter("@StateName", !string.IsNullOrWhiteSpace(request.StateName) ? (object)request.StateName : DBNull.Value),
     new SqlParameter("@StateID", request.StateID != null ? (object)request.StateID : DBNull.Value),
     new SqlParameter("@PrStateID", request.PrStateID != null ? (object)request.PrStateID : DBNull.Value),
-    new SqlParameter("@PrStateName", !string.IsNullOrWhiteSpace(request.PrStateName) ? (object)request.PrStateName : DBNull.Value)
+    new SqlParameter("@PrStateName", !string.IsNullOrWhiteSpace(request.PrStateName) ? (object)request.PrStateName : DBNull.Value),
+    new SqlParameter("@Tehsil", !string.IsNullOrWhiteSpace(request.Tehsil) ? (object)request.Tehsil : DBNull.Value),
+    new SqlParameter("@TehsilPer", !string.IsNullOrWhiteSpace(request.TehsilPer) ? (object)request.TehsilPer : DBNull.Value)
         };
                 #endregion
 
@@ -3753,6 +4090,17 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
             new SqlParameter("@HID", request.HID ?? string.Empty),
             new SqlParameter("@HouseName", request.HouseName ?? string.Empty),
             new SqlParameter("@BloodGroup", request.BloodGroup ?? "Unknown"),
+            new SqlParameter("@Religion", request.Religion ?? string.Empty),
+            new SqlParameter("@MotherTounge", request.MotherTounge ?? string.Empty),
+            new SqlParameter("@BankName", request.BankName ?? string.Empty),
+            new SqlParameter("@AccountNo", request.AccountNo ?? string.Empty),
+            new SqlParameter("@AccountType", request.AccountType ?? string.Empty),
+            new SqlParameter("@IFCCode", request.IFCCode ?? string.Empty),
+            new SqlParameter("@BPLStatus", (object?)request.BPLStatus ?? DBNull.Value),
+            new SqlParameter("@SDisability", request.SDisability ?? string.Empty),
+             new SqlParameter("@Apaarid", request.Apaarid ?? string.Empty),
+            new SqlParameter("@NameAsPerAadhaar", request.NAMEASPERADHAAR ?? string.Empty),
+            new SqlParameter("@SEmail", request.SEmail ?? string.Empty),
             //new SqlParameter("@PhotoPath", studentPhotoPath ?? string.Empty),
             new SqlParameter("@UpdatedBy", updatedBy),
             new SqlParameter("@Endpoint", endpoint)
@@ -3859,7 +4207,7 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 int rowsAffected = await SQLHelperCore.ExecuteNonQueryAsync(
                     connectionString,
                     CommandType.StoredProcedure,
-                    "UpdateRollNoAPINew1",
+                    "UpdateRollNoAPINew",
                     sqlParam
                 );
 
@@ -3943,19 +4291,19 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 #endregion
 
                 #region Prepare Parameters and Execute Update
-                SqlParameter[] sqlParam = {
-            new SqlParameter("@StudentInfoID", request.StudentInfoID),
-            new SqlParameter("@PrePrimaryBoardNo", request.PrePrimaryBoardNo ?? (object)DBNull.Value),
-            new SqlParameter("@PrePrimaryDate", request.PrePrimaryDate ?? (object)DBNull.Value),
-            new SqlParameter("@PrimaryBoardNo", request.PrimaryBoardNo ?? (object)DBNull.Value),
-            new SqlParameter("@PrimaryDate", request.PrimaryDate ?? (object)DBNull.Value),
-            new SqlParameter("@MiddleBoardNo", request.MiddleBoardNo ?? (object)DBNull.Value),
-            new SqlParameter("@MiddleDate", request.MiddleDate ?? (object)DBNull.Value),
-            new SqlParameter("@HighBoardNo", request.HighBoardNo ?? (object)DBNull.Value),
-            new SqlParameter("@HighDate", request.HighDate ?? (object)DBNull.Value),
-            new SqlParameter("@HigherBoardNo", request.HigherBoardNo ?? (object)DBNull.Value),
-            new SqlParameter("@HigherDate", request.HigherDate ?? (object)DBNull.Value)
-        };
+                SqlParameter[] sqlParam = { new SqlParameter("@StudentInfoID", request.StudentInfoID),
+                    new SqlParameter("@PrePrimaryBoardNo", request.PrePrimaryBoardNo ?? (object)DBNull.Value),
+                    new SqlParameter("@PrePrimaryDate", request.PrePrimaryDate ?? (object)DBNull.Value),
+                    new SqlParameter("@PrimaryBoardNo", request.PrimaryBoardNo ?? (object)DBNull.Value),
+                    new SqlParameter("@PrimaryDate", request.PrimaryDate ?? (object)DBNull.Value),
+                    new SqlParameter("@MiddleBoardNo", request.MiddleBoardNo ?? (object)DBNull.Value),
+                    new SqlParameter("@MiddleDate", request.MiddleDate ?? (object)DBNull.Value),
+                    new SqlParameter("@HighBoardNo", request.HighBoardNo ?? (object)DBNull.Value),
+                    new SqlParameter("@HighDate", request.HighDate ?? (object)DBNull.Value),
+                    new SqlParameter("@HigherBoardNo", request.HigherBoardNo ?? (object)DBNull.Value),
+                    new SqlParameter("@HigherDate", request.HigherDate ?? (object)DBNull.Value)
+                };
+
 
                 int rowsAffected = await SQLHelperCore.ExecuteNonQueryAsync(
                     connectionString,
@@ -5091,7 +5439,7 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 var rowsAffected = await SQLHelperCore.ExecuteNonQueryAsync(
                     connectionString,
                     CommandType.StoredProcedure,
-                    "UpdateRollNoAPINew3",
+                    "UpdateStudentRollNumbersBulk",
                     new SqlParameter[]
                     {
                 new SqlParameter("@Updates", updateBatch)
@@ -5208,9 +5556,3 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
 
     }
 }
-
-
-
-
-
-

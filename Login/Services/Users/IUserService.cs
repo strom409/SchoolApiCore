@@ -6,6 +6,7 @@ namespace Login.Services.Users
     {
         Task<ResponseModel> AddUserAsync(RequestUserDto user, string clientId);
         Task<ResponseModel> UpdateUserAsync(RequestUserDto user, string clientId);
+        Task<ResponseModel> ChangeUserPasswordAsync(RequestUserDto request, string clientId);
         Task<ResponseModel> DeleteUserAsync(int userId, string clientId);
     }
 }

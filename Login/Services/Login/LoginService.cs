@@ -275,8 +275,6 @@ WHERE UserName = @UserName
                 return response;
             }
         }
-
-
         //private string GetConnectionString(string clientId)
         //{
         //    Lowercase to handle case -insensitive client id

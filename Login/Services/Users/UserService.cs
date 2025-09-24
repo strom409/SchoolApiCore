@@ -1,5 +1,6 @@
 ﻿using login.Repository;
 using login.Repository.SQL;
+using Login.Services.Login;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System.Data;
@@ -78,8 +79,7 @@ namespace Login.Services.Users
             new SqlParameter("@UserName", encryptedUserName),
             new SqlParameter("@PW", encryptedPassword),
             new SqlParameter("@Activation", user.Activation),
-            new SqlParameter("@Control1Id", user.Control1Id ?? string.Empty),
-            new SqlParameter("@ControlId", user.ControlId ?? string.Empty),
+            new SqlParameter("@ClassIDS", user.ClassIDS),
             new SqlParameter("@Current_Session", user.Current_Session ?? string.Empty),
             new SqlParameter("@Dashboard", user.Dashboard ?? string.Empty),
             new SqlParameter("@UserAddress", user.UserAddress ?? string.Empty),
@@ -93,10 +93,10 @@ namespace Login.Services.Users
 
                 string insertQuery = @"
         INSERT INTO Users 
-            (UserName, UserPassword, Activation, Control1Id, ControlId, Current_Session, Dashboard, 
+            (UserName, UserPassword, Activation,ClassIDS, Current_Session, Dashboard, 
              UserAddress, UserEmail, UserFullName, UserLogoPath, UserPhoneNo, UserRemarks, UserTypeID) 
         VALUES 
-            (@UserName, @PW, @Activation, @Control1Id, @ControlId, @Current_Session, @Dashboard, 
+            (@UserName, @PW, @Activation,@ClassIDS, @Current_Session, @Dashboard, 
              @UserAddress, @UserEmail, @UserFullName, @UserLogoPath, @UserPhoneNo, @UserRemarks, @UserTypeID);
         SELECT CAST(SCOPE_IDENTITY() AS INT) AS NewUserId;";
 
@@ -175,12 +175,10 @@ namespace Login.Services.Users
 
                 SqlParameter[] parameters =
                 {
-            new SqlParameter("@UserId", user.UserId),   // Primary key for update
+            new SqlParameter("@UserId", user.UserId),   
             new SqlParameter("@UserName", encryptedUserName),
             new SqlParameter("@PW", encryptedPassword),
             new SqlParameter("@Activation", user.Activation),
-            new SqlParameter("@Control1Id", user.Control1Id ?? string.Empty),
-            new SqlParameter("@ControlId", user.ControlId ?? string.Empty),
             new SqlParameter("@Current_Session", user.Current_Session ?? string.Empty),
             new SqlParameter("@Dashboard", user.Dashboard ?? string.Empty),
             new SqlParameter("@UserAddress", user.UserAddress ?? string.Empty),
@@ -188,8 +186,8 @@ namespace Login.Services.Users
             new SqlParameter("@UserFullName", user.UserFullName ?? string.Empty),
             new SqlParameter("@UserLogoPath", user.UserLogoPath ?? string.Empty),
             new SqlParameter("@UserPhoneNo", user.UserPhoneNo ?? string.Empty),
-            new SqlParameter("@UserRemarks", user.UserRemarks ?? string.Empty),
-            new SqlParameter("@UserTypeID", user.UserTypeID)
+            new SqlParameter("@UserRemarks", user.UserRemarks ?? string.Empty)
+            
         };
 
                 string updateQuery = @"
@@ -198,8 +196,7 @@ namespace Login.Services.Users
                 UserName = @UserName,
                 UserPassword = @PW,
                 Activation = @Activation,
-                Control1Id = @Control1Id,
-                ControlId = @ControlId,
+                ClassIDS=@ClassIDS,
                 Current_Session = @Current_Session,
                 Dashboard = @Dashboard,
                 UserAddress = @UserAddress,
@@ -208,7 +205,6 @@ namespace Login.Services.Users
                 UserLogoPath = @UserLogoPath,
                 UserPhoneNo = @UserPhoneNo,
                 UserRemarks = @UserRemarks,
-                UserTypeID = @UserTypeID
             WHERE UserId = @UserId";
 
                 int result = await SQLHelperCore.ExecuteNonQueryAsync(
@@ -274,19 +270,21 @@ namespace Login.Services.Users
             new SqlParameter("@UserId", userId)
         };
 
-                // Hard delete (removes record permanently)
-                string deleteQuery = @"DELETE FROM Users WHERE UserId = @UserId";
+                // Soft delete (set Activation = 0 instead of deleting record)
+                string updateQuery = @"UPDATE Users 
+                               SET Activation = 0 
+                               WHERE UserId = @UserId AND Activation = 1";
 
                 int result = await SQLHelperCore.ExecuteNonQueryAsync(
                     connectionString,
                     CommandType.Text,
-                    deleteQuery,
+                    updateQuery,
                     parameters
                 );
 
                 response.IsSuccess = result > 0;
                 response.Status = result > 0 ? 1 : 0;
-                response.Message = result > 0 ? "User deleted successfully." : "Failed to delete user.";
+                response.Message = result > 0 ? "User deleted (soft delete) successfully." : "User not found or already deleted.";
             }
             catch (Exception ex)
             {
@@ -307,6 +305,99 @@ namespace Login.Services.Users
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        public async Task<ResponseModel> ChangeUserPasswordAsync(RequestUserDto request, string clientId)
+        {
+            var response = new ResponseModel
+            {
+                IsSuccess = true,
+                Status = 0,
+                Message = "No data!"
+            };
+
+            try
+            {
+                #region Get Connection String
+                var connectionStringHelper = new ConnectionStringHelper(_configuration);
+                string connectionString = connectionStringHelper.GetConnectionString(clientId);
+
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    response.IsSuccess = false;
+                    response.Status = -1;
+                    response.Message = "Invalid client connection string.";
+                    return response;
+                }
+                #endregion
+
+                #region Encrypt Credentials
+                string encryptedUserName = Encryption.Encrypt(request.UserName, Encryption.key);
+                string encryptedOldPassword = Encryption.Encrypt(request.OldPassword, Encryption.key);
+                string encryptedNewPassword = Encryption.Encrypt(request.UserPassword, Encryption.key);
+                #endregion
+
+                #region Check Old Password
+                SqlParameter[] checkParams =
+                {
+            new SqlParameter("@UserName", encryptedUserName),
+            new SqlParameter("@OldPassword", encryptedOldPassword)
+        };
+
+                string checkQuery = "SELECT COUNT(UserID) AS Val FROM Users WHERE UserName=@UserName AND UserPassword=@OldPassword";
+
+                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, checkQuery, checkParams);
+
+                int check = 0;
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    check = Convert.ToInt32(ds.Tables[0].Rows[0]["Val"]);
+                }
+
+                if (check == 0)
+                {
+                    response.Message = "Old Password is incorrect!";
+                    return response;
+                }
+                #endregion
+
+                #region Update Password
+                SqlParameter[] updateParams =
+                {
+            new SqlParameter("@UserName", encryptedUserName),
+            new SqlParameter("@PW", encryptedNewPassword)
+        };
+
+                string updateQuery = "UPDATE Users SET UserPassword=@PW WHERE UserName=@UserName";
+
+                int rowsAffected = await SQLHelperCore.ExecuteNonQueryAsync(connectionString, CommandType.Text, updateQuery, updateParams);
+
+                if (rowsAffected > 0)
+                {
+                    response.Status = 1;
+                    response.Message = "Password changed successfully.";
+                }
+                else
+                {
+                    response.Message = "Password not changed!";
+                }
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Status = -500;
+                response.Message = "Error occurred while changing password.";
+                login.Repository.Error.ErrorBLL.CreateErrorLog("UserService", "ChangeUserPasswordAsync", ex.ToString());
+            }
+
+            return response;
+        }
+
 
     }
 }

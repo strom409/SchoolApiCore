@@ -83,7 +83,7 @@ namespace Student.Services.Students
         public string? PEN { get; set; }
         public string? WEIGHT { get; set; }
         public string? Height { get; set; }
-        public string? NAMEASPERADHAAR { get; set; }
+        public string? NameAsPerAadhaar { get; set; }
         public string? DOBAsPerAadhaar { get; set; }
         //public string ExamRollNo { get; set; }
 

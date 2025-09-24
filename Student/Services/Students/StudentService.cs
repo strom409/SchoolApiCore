@@ -219,7 +219,12 @@ namespace Student.Services.Students
     new SqlParameter("@BPLStatus", request.BPLStatus ?? (object)DBNull.Value),
     new SqlParameter("@SDisability", request.SDisability ?? string.Empty),
     new SqlParameter("@Tehsil", request.Tehsil ?? string.Empty),
-    new SqlParameter("@TehsilPer", request.TehsilPer ?? string.Empty)
+    new SqlParameter("@TehsilPer", request.TehsilPer ?? string.Empty),
+    new SqlParameter("@BPLCategory", request.BPLCategory ?? string.Empty),
+    new SqlParameter("@CWSNStatus", request.CWSNStatus ?? (object)DBNull.Value),
+    new SqlParameter("@BPLCategoryID", request.BPLCategoryID ?? (object)DBNull.Value),
+    new SqlParameter("@Category", request.Category ?? string.Empty),
+    new SqlParameter("@CategoryID", request.CategoryID ?? (object)DBNull.Value)
 };
 
 
@@ -650,7 +655,7 @@ WHERE si.ClassID = @ClassID";
                             PEN = row["PEN"]?.ToString(),
                             WEIGHT = row["WEIGHT"]?.ToString(),
                             Height = row["Height"]?.ToString(),
-                            NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                            NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                             DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
                             Apaarid = row["APAARSTUDENTID"]?.ToString(),
                             HouseName = row["HouseName"]?.ToString(),
@@ -884,7 +889,7 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         PEN = row["PEN"]?.ToString(),
                         WEIGHT = row["WEIGHT"]?.ToString(),
                         Height = row["Height"]?.ToString(),
-                        NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                        NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                         DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
                         Religion = row["Religion"]?.ToString(),
                         MotherTounge = row["MotherTounge"]?.ToString(), // Note: DB column "MotherTounge"
@@ -1121,7 +1126,7 @@ WHERE s.AdmissionNo = @AdmissionNo";
                             PEN = row["PEN"]?.ToString(),
                             WEIGHT = row["WEIGHT"]?.ToString(),
                             Height = row["Height"]?.ToString(),
-                            NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                            NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                             DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
                             Religion = row["Religion"]?.ToString(),
                             MotherTounge = row["MotherTounge"]?.ToString(), // Note: DB column "MotherTounge"
@@ -1362,7 +1367,7 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         PEN = row["PEN"]?.ToString(),
                         WEIGHT = row["WEIGHT"]?.ToString(),
                         Height = row["Height"]?.ToString(),
-                        NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                        NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                         DOBASPERADHAAR = SafeDate(row["DOBASPERADHAAR"]),
                         Religion = row["Religion"]?.ToString(),
                         MotherTounge = row["MotherTounge"]?.ToString(),
@@ -1815,7 +1820,7 @@ WHERE s.PhoneNo = @PhoneNo";
                         PEN = row["PEN"]?.ToString(),
                         WEIGHT = row["WEIGHT"]?.ToString(),
                         Height = row["Height"]?.ToString(),
-                        NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                        NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                         DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
                         Religion = row["Religion"]?.ToString(),
                         MotherTounge = row["MotherTounge"]?.ToString(), // Note: DB column "MotherTounge"
@@ -2040,7 +2045,7 @@ WHERE si.Current_Session = @CurrentSession";
                             PEN = row["PEN"]?.ToString(),
                             WEIGHT = row["WEIGHT"]?.ToString(),
                             Height = row["Height"]?.ToString(),
-                            NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                            NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                             DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
                             Religion = row["Religion"]?.ToString(),
                             MotherTounge = row["MotherTounge"]?.ToString(), // Note: DB column "MotherTounge"
@@ -2540,7 +2545,7 @@ ORDER BY StudentInfo.ClassID, StudentInfo.SectionID, Rollno
                         PEN = dr["Pen"].ToString(),
                         Height = dr["Height"].ToString(),
                         WEIGHT = dr["WEIGHT"].ToString(),
-                        NAMEASPERADHAAR = dr["NAMEASPERADHAAR"].ToString(),
+                        NameAsPerAadhaar = dr["NAMEASPERADHAAR"].ToString(),
                         DOBASPERADHAAR = string.IsNullOrEmpty(dr["DOBASPERADHAAR"].ToString()) ? null : Convert.ToDateTime(dr["DOBASPERADHAAR"]).ToString("dd-MM-yyyy"),
                         BloodGroup = dr["BloodGroup"].ToString(),
                         PrDistrictID = dr["PrDistrictID"]?.ToString(),
@@ -2783,7 +2788,7 @@ ORDER BY
                             PEN = reader["Pen"].ToString(),
                             Height = reader["Height"].ToString(),
                             WEIGHT = reader["WEIGHT"].ToString(),
-                            NAMEASPERADHAAR = reader["NAMEASPERADHAAR"].ToString(),
+                            NameAsPerAadhaar = reader["NAMEASPERADHAAR"].ToString(),
 
                             DOBASPERADHAAR = (reader["DOBASPERADHAAR"] != DBNull.Value && !string.IsNullOrWhiteSpace(reader["DOBASPERADHAAR"].ToString()))
         ? Convert.ToDateTime(reader["DOBASPERADHAAR"]).ToString("dd-MM-yyyy")
@@ -4099,7 +4104,7 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
             new SqlParameter("@BPLStatus", (object?)request.BPLStatus ?? DBNull.Value),
             new SqlParameter("@SDisability", request.SDisability ?? string.Empty),
              new SqlParameter("@Apaarid", request.Apaarid ?? string.Empty),
-            new SqlParameter("@NameAsPerAadhaar", request.NAMEASPERADHAAR ?? string.Empty),
+            new SqlParameter("@NameAsPerAadhaar", request.NameAsPerAadhaar ?? string.Empty),
             new SqlParameter("@SEmail", request.SEmail ?? string.Empty),
             //new SqlParameter("@PhotoPath", studentPhotoPath ?? string.Empty),
             new SqlParameter("@UpdatedBy", updatedBy),
@@ -5147,7 +5152,7 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
             new SqlParameter("@PEN", request.PEN ?? (object)DBNull.Value),
             new SqlParameter("@Height", request.Height ?? (object)DBNull.Value),
             new SqlParameter("@WEIGHT", request.WEIGHT ?? (object)DBNull.Value),
-            new SqlParameter("@NAMEASPERADHAAR", request.NAMEASPERADHAAR ?? (object)DBNull.Value),
+            new SqlParameter("@NAMEASPERADHAAR", request.NameAsPerAadhaar ?? (object)DBNull.Value),
             new SqlParameter("@DOBASPERADHAAR", request.DOBAsPerAadhaar ?? (object)DBNull.Value),
             new SqlParameter("@BloodGroup", request.BloodGroup ?? (object)DBNull.Value),
         };
@@ -5469,6 +5474,111 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
 
             return response;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        public async Task<ResponseModel> UpdateOldSchoolBasicDetails(OldSchoolDetailsDTO request, string clientId)
+        {
+            #region Initialize Response
+            var response = new ResponseModel
+            {
+                IsSuccess = true,
+                Status = 0,
+                Message = "Failed to update old school details"
+            };
+            #endregion
+
+            try
+            {
+                #region Get Connection String
+                var connectionStringHelper = new ConnectionStringHelper(_configuration);
+                string connectionString = connectionStringHelper.GetConnectionString(clientId);
+                #endregion
+
+                #region Get StudentID from StudentInfo
+                string getStudentIdQuery = "SELECT StudentID FROM StudentInfo WHERE StudentInfoID = @StudentInfoID";
+                SqlParameter[] getIdParam =
+                {
+            new SqlParameter("@StudentInfoID", request.StudentInfoID)
+        };
+
+                DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, getStudentIdQuery, getIdParam);
+
+                if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
+                {
+                    response.Message = "Invalid StudentInfoID!";
+                    return response;
+                }
+
+                object studentIdObj = ds.Tables[0].Rows[0]["StudentID"];
+                if (studentIdObj == null || studentIdObj == DBNull.Value)
+                {
+                    response.Message = "StudentID not found!";
+                    return response;
+                }
+
+                int studentId = Convert.ToInt32(studentIdObj);
+                #endregion
+
+                #region Prepare SQL Parameters
+                var parameters = new List<SqlParameter>
+        {
+            new SqlParameter("@StudentID", studentId),
+            new SqlParameter("@OldSchoolName", (object?)request.OldSchoolName ?? DBNull.Value),
+            new SqlParameter("@OldYear", (object?)request.OldYear ?? DBNull.Value),
+            new SqlParameter("@OldLastDay", (object?)request.OldLastDay ?? DBNull.Value),
+            new SqlParameter("@OldGrade", (object?)request.OldGrade ?? DBNull.Value),
+            new SqlParameter("@OldMarks", (object?)request.OldMarks ?? DBNull.Value),
+            new SqlParameter("@OldAcademicNo", (object?)request.OldAcademicNo ?? DBNull.Value),
+        };
+                #endregion
+
+                #region SQL Query
+                string query = @"
+        UPDATE Students
+        SET 
+            OldSchoolName = @OldSchoolName,
+            OldYear = @OldYear,
+            OldLastDay = @OldLastDay,
+            OldGrade = @OldGrade,
+            OldMarks = @OldMarks,
+            OldAcademicNo = @OldAcademicNo
+        WHERE StudentID = @StudentID";
+                #endregion
+
+                #region Execute Query
+                int rowsAffected = await SQLHelperCore.ExecuteNonQueryAsync(connectionString, CommandType.Text, query, parameters.ToArray());
+
+                if (rowsAffected > 0)
+                {
+                    response.IsSuccess = true;
+                    response.Status = 1;
+                    response.Message = "Old school details updated successfully";
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Status = 0;
+                    response.Message = "No student found to update";
+                }
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                Repository.Error.ErrorBLL.CreateErrorLog("StudentService", "UpdateOldSchoolBasicDetails", ex.ToString());
+                response.IsSuccess = false;
+                response.Status = -1;
+                response.Error = ex.Message;
+            }
+
+            return response;
+        }
+
+
+
         /// <summary>
         /// 
         /// </summary>

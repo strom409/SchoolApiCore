@@ -70,6 +70,7 @@ namespace Login.Services.HT
                 response.IsSuccess = false;
                 response.Status = -1;
                 response.Message = "Error: " + ex.Message;
+                login.Repository.Error.ErrorBLL.CreateErrorLog("HTService", "getHT", ex.ToString());
                 #endregion
             }
 
@@ -119,11 +120,11 @@ namespace Login.Services.HT
             new SqlParameter("@Address", Encryption.Encrypt(htData.Address, Encryption.key)),
             new SqlParameter("@PhoneNo", Encryption.Encrypt(htData.PhoneNo, Encryption.key)),
             new SqlParameter("@Email", Encryption.Encrypt(htData.Email, Encryption.key)),
-            new SqlParameter("@Website", Encryption.Encrypt(htData.Website, Encryption.key)),
+           // new SqlParameter("@Website", Encryption.Encrypt(htData.Website, Encryption.key)),
             new SqlParameter("@FYear", htData.FYear),
-            new SqlParameter("@DFrom", string.IsNullOrEmpty(htData.DFrom?.ToString()) ? DateTime.Now.Date : htData.DFrom),
-            new SqlParameter("@DTo", string.IsNullOrEmpty(htData.DTo?.ToString()) ? DateTime.Now.Date : htData.DTo),
-            new SqlParameter("@UserName", htData.UserName),
+           // new SqlParameter("@DFrom", string.IsNullOrEmpty(htData.DFrom?.ToString()) ? DateTime.Now.Date : htData.DFrom),
+           // new SqlParameter("@DTo", string.IsNullOrEmpty(htData.DTo?.ToString()) ? DateTime.Now.Date : htData.DTo),
+            //new SqlParameter("@UserName", htData.UserName),
             new SqlParameter("@LiveSession", htData.LiveSession),
             new SqlParameter("@LiveYear", htData.LiveYear)
         };
@@ -152,6 +153,8 @@ namespace Login.Services.HT
                 response.IsSuccess = false;
                 response.Status = -1;
                 response.Message = "Error: " + ex.Message;
+               login.Repository.Error.ErrorBLL.CreateErrorLog("HTService", "UpdateHT", ex.ToString());
+
                 #endregion
             }
 

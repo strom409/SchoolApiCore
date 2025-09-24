@@ -94,10 +94,10 @@ namespace SchoolApiCore.Controllers
                 Message = "Issue at Controller Level !",
 
             };
-             var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+             //var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
 
-            //  var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
-        //   var clientId = "client2";
+              var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+         // var clientId = "client2";
 
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
@@ -213,9 +213,9 @@ namespace SchoolApiCore.Controllers
                 
                 var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level !" };
 
-                var clientId = "client2";
+               // var clientId = "client2";
 
-              //  var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
 
                 if (string.IsNullOrEmpty(clientId))
                     return Unauthorized("ClientId  missing");
@@ -425,6 +425,58 @@ namespace SchoolApiCore.Controllers
                 });
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="actionType"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        //      for alnoor school
+        [HttpPut("update-old-school-details")]
+        public async Task<IActionResult> UpdateOldSchoolDetails([FromQuery] int actionType, [FromBody] OldSchoolDetailsDTO request)
+        {
+            try
+            {
+                var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level !" };
+                var clientId = "client2";
+                //var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return Unauthorized("ClientId missing");
+
+                switch (actionType)
+                {
+                    case 0: // Update Old School Basic Details
+                        response = await _studentService.UpdateOldSchoolBasicDetails(request, clientId);
+                        break;
+
+                    default:
+                        response = new ResponseModel
+                        {
+                            IsSuccess = false,
+                            Status = 0,
+                            Message = "Invalid action type."
+                        };
+                        break;
+                }
+
+                if (response.IsSuccess)
+                    return Ok(response);
+                else
+                    return BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                Student.Repository.Error.ErrorBLL.CreateErrorLog("StudentController", "UpdateOldSchoolDetails", ex.ToString());
+
+                return StatusCode(500, new ResponseModel
+                {
+                    IsSuccess = false,
+                    Status = -1,
+                    Error = ex.Message
+                });
+            }
+        }
+
     }
 }
 

@@ -117,6 +117,11 @@ namespace Student.Services.Students
         public string? SDisability { get; set; }
         public string? Tehsil { get; set; }
         public string? TehsilPer { get; set; }
+        public string? BPLCategory { get; set; }
+        public bool? CWSNStatus { get; set; }
+        public int? BPLCategoryID { get; set; }
+        public string? Category { get; set; }
+        public long? CategoryID { get; set; }
         public IFormFile? StudentPhoto { get; set; }
         public IFormFile? FatherPhoto { get; set; }
         public IFormFile? MotherPhoto { get; set; }

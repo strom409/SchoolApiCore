@@ -1471,7 +1471,7 @@ WHERE s.PhoneNo = @PhoneNo";
                         PEN = row["PEN"]?.ToString(),
                         WEIGHT = row["WEIGHT"]?.ToString(),
                         Height = row["Height"]?.ToString(),
-                        NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                        NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                         DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
                     };
 
@@ -1676,7 +1676,7 @@ WHERE s.PresentAddress LIKE '%' + @Address + '%' OR s.PerminantAddress LIKE '%' 
                             PEN = row["PEN"]?.ToString(),
                             WEIGHT = row["WEIGHT"]?.ToString(),
                             Height = row["Height"]?.ToString(),
-                            NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                            NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                             DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
                         };
 
@@ -1885,7 +1885,7 @@ WHERE s.StudentName LIKE '%' + @StudentName + '%'";
                             PEN = row["PEN"]?.ToString(),
                             WEIGHT = row["WEIGHT"]?.ToString(),
                             Height = row["Height"]?.ToString(),
-                            NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                            NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                             DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
                         };
 
@@ -2095,7 +2095,7 @@ WHERE dbo.AcademicNo(si.Current_Session, s.StudentID, c.SubDepartmentID) = @Acad
                             PEN = row["PEN"]?.ToString(),
                             WEIGHT = row["WEIGHT"]?.ToString(),
                             Height = row["Height"]?.ToString(),
-                            NAMEASPERADHAAR = row["NAMEASPERADHAAR"]?.ToString(),
+                            NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
                             DOBASPERADHAAR = row["DOBASPERADHAAR"]?.ToString(),
                         };
 

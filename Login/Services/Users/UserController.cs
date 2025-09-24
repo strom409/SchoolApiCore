@@ -73,7 +73,8 @@ namespace Login.Services.Users
             try
             {
 
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                //  var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                var clientId = "client1";
 
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");
@@ -82,7 +83,9 @@ namespace Login.Services.Users
                     case 0: // Add
                         response = await _userService.UpdateUserAsync(request, clientId);
                         break;
-
+                    case 1: // Add
+                        response = await _userService.ChangeUserPasswordAsync(request, clientId);
+                        break;
                     default:
                         response.IsSuccess = false;
                         response.Status = -1;

@@ -57,18 +57,15 @@ namespace FeeManagement.Services.FeeHead
                 #region Insert FeeHead
                 string insertQuery = @"
             INSERT INTO FeeHeads
-            (FHName, FHType, UserName, IsDeleted, UpdatedOn, UpdatedBy, Frate, isprimay)
+            (FHName, FHType, UserName, IsDeleted, isprimay)
             VALUES
-            (@FHName, @FHType, @UserName, 0, @UpdatedOn, @UpdatedBy, @Frate, @isprimay)";
+            (@FHName, @FHType, @UserName, 0, @isprimay)";
 
                 var insertParams = new[]
                 {
             new SqlParameter("@FHName", request.FHName ?? string.Empty),
             new SqlParameter("@FHType", request.FHType),
             new SqlParameter("@UserName", request.UserName ?? string.Empty),
-            new SqlParameter("@UpdatedOn", DateTime.Now),
-            new SqlParameter("@UpdatedBy", request.UpdatedBy ?? string.Empty),
-            new SqlParameter("@Frate", request.Frate),
             new SqlParameter("@isprimay", request.IsPrimary)
         };
 
@@ -158,7 +155,6 @@ namespace FeeManagement.Services.FeeHead
                 UserName = @UserName,
                 UpdatedOn = @UpdatedOn,
                 UpdatedBy = @UpdatedBy,
-                Frate = @Frate,
                 isprimay = @isprimay
             WHERE FHID = @FHID";
 
@@ -170,7 +166,6 @@ namespace FeeManagement.Services.FeeHead
             new SqlParameter("@UserName", request.UserName ?? string.Empty),
             new SqlParameter("@UpdatedOn", DateTime.Now),
             new SqlParameter("@UpdatedBy", request.UpdatedBy ?? string.Empty),
-            new SqlParameter("@Frate", request.Frate),
             new SqlParameter("@IsPrimay", request.IsPrimary)
         };
 
@@ -399,7 +394,7 @@ namespace FeeManagement.Services.FeeHead
         public async Task<ResponseModel> DeleteFeeHead(long fHID, string clientId, string updatedBy)
         {
             #region Initialize Response
-            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "FeeHead Not Deleted!" };
+            var response = new ResponseModel { IsSuccess = false, Status = 0, Message = "FeeHead not deleted." };
             #endregion
 
             try
@@ -410,18 +405,21 @@ namespace FeeManagement.Services.FeeHead
 
                 if (string.IsNullOrEmpty(connectionString))
                 {
-                    response.IsSuccess = false;
-                    response.Status = 0;
                     response.Message = "Invalid client ID.";
                     return response;
                 }
                 #endregion
 
-                #region Delete FeeHead
-                string query = "UPDATE FeeHeads SET IsDeleted = 1, UpdatedOn = GETDATE(), UpdatedBy = @UpdatedBy WHERE FHID = @FHID";
-
-                var sqlParams = new[]
-                {
+                #region Soft Delete Query
+                string query = @"
+            UPDATE FeeHeads 
+            SET IsDeleted = 1, 
+                UpdatedOn = GETDATE(), 
+                UpdatedBy = @UpdatedBy 
+            WHERE FHID = @FHID AND IsDeleted = 0";
+        
+        var sqlParams = new[]
+        {
             new SqlParameter("@FHID", fHID),
             new SqlParameter("@UpdatedBy", updatedBy ?? string.Empty)
         };
@@ -432,7 +430,11 @@ namespace FeeManagement.Services.FeeHead
                 {
                     response.IsSuccess = true;
                     response.Status = 1;
-                    response.Message = "FeeHead Deleted Successfully";
+                    response.Message = "FeeHead deleted successfully (soft delete).";
+                }
+                else
+                {
+                    response.Message = "FeeHead not found or already deleted.";
                 }
                 #endregion
 
@@ -446,13 +448,15 @@ namespace FeeManagement.Services.FeeHead
                 response.Message = "Error deleting FeeHead.";
                 response.Error = ex.Message;
 
-                Repository.Error.ErrorBLL.CreateErrorLog("FeeHeadService", "DeleteFeeHead",
-                    $"Error: {ex.Message} | StackTrace: {ex.StackTrace} | FHID: {fHID}");
-
+                Repository.Error.ErrorBLL.CreateErrorLog(
+                    "FeeHeadService", "DeleteFeeHead",
+                    $"Error: {ex.Message} | StackTrace: {ex.StackTrace} | FHID: {fHID}"
+                );
                 return response;
                 #endregion
             }
         }
+
 
     }
 }

@@ -22,8 +22,8 @@ namespace FeeManagement.Services.FeeStructure
 
             try
             {
-                var clientId = "client1";
-                //   var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+              //  var clientId = "client1";
+                   var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");
 
@@ -56,8 +56,8 @@ namespace FeeManagement.Services.FeeStructure
         public async Task<ActionResult<ResponseModel>> Fetch([FromQuery] int actionType, [FromQuery] string? param)
         {
             var response = new ResponseModel { IsSuccess = true, Status = 0 };
-            var clientId = "client1";
-           // var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+            //var clientId = "client1";
+            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -109,8 +109,8 @@ namespace FeeManagement.Services.FeeStructure
 
             try
             {
-                var clientId = "client1";
-                //var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+              //  var clientId = "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");
 
@@ -148,8 +148,8 @@ namespace FeeManagement.Services.FeeStructure
 
             try
             {
-                //var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
-                var clientId = "client1";
+                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+               // var clientId = "client1";
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing.");
 

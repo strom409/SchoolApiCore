@@ -33,6 +33,7 @@ namespace Student.Services.Students
         Task<ResponseModel> GetNextAdmissionNoAsync(string clientId);
         Task<ResponseModel> GetAllSessions(string clientId);
         Task<ResponseModel> GetStudentIdAsync(string StudentIdDto, string clientId);
+        Task<ResponseModel> GetStudentAuditByDateAsync(string date, string clientId);
         Task<ResponseModel> AttendanceDashboardForDate(string session, string clientId);
 
         Task<ResponseModel> UpdateStudentAsync(UpdateStudentRequestDTO request, string clientId);

@@ -391,10 +391,10 @@ namespace FeeManagement.Services.FeeHead
             }
         }
 
-        public async Task<ResponseModel> DeleteFeeHead(long fHID, string clientId, string updatedBy)
+        public async Task<ResponseModel> DeleteFeeHead(long fHID, string clientId)
         {
             #region Initialize Response
-            var response = new ResponseModel { IsSuccess = false, Status = 0, Message = "FeeHead not deleted." };
+            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "FeeHead not deleted." };
             #endregion
 
             try
@@ -414,14 +414,12 @@ namespace FeeManagement.Services.FeeHead
                 string query = @"
             UPDATE FeeHeads 
             SET IsDeleted = 1, 
-                UpdatedOn = GETDATE(), 
-                UpdatedBy = @UpdatedBy 
+                UpdatedOn = GETDATE()
             WHERE FHID = @FHID AND IsDeleted = 0";
-        
-        var sqlParams = new[]
-        {
-            new SqlParameter("@FHID", fHID),
-            new SqlParameter("@UpdatedBy", updatedBy ?? string.Empty)
+
+                var sqlParams = new[]
+                {
+            new SqlParameter("@FHID", fHID)
         };
 
                 int result = await SQLHelperCore.ExecuteNonQueryAsync(connectionString, CommandType.Text, query, sqlParams);
@@ -456,6 +454,7 @@ namespace FeeManagement.Services.FeeHead
                 #endregion
             }
         }
+
 
 
     }

@@ -150,8 +150,8 @@ namespace FeeManagement.Services.FeeHead
 
             try
             {
-                var clientId = "client2";
-                // var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+              // var clientId = "client2";
+                 var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
 
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing.");
@@ -159,7 +159,7 @@ namespace FeeManagement.Services.FeeHead
                 switch (actionType)
                 {
                     case 0: // Delete FeeHead (soft delete)
-                        response = await _feeHeadService.DeleteFeeHead(id, clientId, "System");
+                        response = await _feeHeadService.DeleteFeeHead(id, clientId);
                         break;
 
                     default:

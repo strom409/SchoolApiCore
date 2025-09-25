@@ -9,6 +9,6 @@ namespace FeeManagement.Services.FeeHead
         Task<ResponseModel> GetFeeHeadById(long fHID, string clientId);
         Task<ResponseModel> GetFeeHeadsByType(int fHType, string clientId);
         Task<ResponseModel> GetAllFeeHeads(string clientId);
-        Task<ResponseModel> DeleteFeeHead(long fHID, string clientId, string updatedBy);
+        Task<ResponseModel> DeleteFeeHead(long fHID, string clientId);
     }
 }

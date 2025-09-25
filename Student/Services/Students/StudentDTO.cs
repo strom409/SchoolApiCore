@@ -119,6 +119,16 @@
         public string? SDisability { get; set; }
         public string? Tehsil { get; set; }
         public string? TehsilPer { get; set; }
+        public string BPLCategory { get; set; }
+        public bool? CWSNStatus { get; set; }
+        public string Category { get; set; }
+
+        public string OldSchoolName { get; set; }
+        public string OldYear { get; set; }
+        public string OldLastDay { get; set; }
+        public string OldGrade { get; set; }
+        public string OldMarks { get; set; }
+        public string OldAcademicNo { get; set; }
 
 
     }

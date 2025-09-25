@@ -1245,6 +1245,15 @@ WHERE s.AdmissionNo = @AdmissionNo";
             s.SDisability,
             s.Tehsil,
             s.TehsilPer,
+            s.CWSNStatus,      
+            s.Category,        
+            s.BPLCategory,     
+            s.OldSchoolName,   
+            s.OldYear,
+            s.OldLastDay,
+            s.OldGrade,
+            s.OldMarks,
+            s.OldAcademicNo,
             si.StudentInfoID,
             si.RollNo,
             si.PhotoPath,
@@ -1387,7 +1396,16 @@ WHERE s.AdmissionNo = @AdmissionNo";
                         StateID = row["StateID"]?.ToString(),
                         StateName = row["StateName"]?.ToString(),
                         PrStateID = row["PrStateID"]?.ToString(),
-                        PrStateName = row["PrStateName"]?.ToString()
+                        PrStateName = row["PrStateName"]?.ToString(),
+                        BPLCategory = row["BPLCategory"]?.ToString(),
+                        CWSNStatus = row["CWSNStatus"] != DBNull.Value ? Convert.ToBoolean(row["CWSNStatus"]) : (bool?)null,
+                        Category = row["Category"]?.ToString(),
+                        OldSchoolName = row["OldSchoolName"]?.ToString(),
+                        OldYear = row["OldYear"]?.ToString(),
+                        OldLastDay = row["OldLastDay"]?.ToString(),
+                        OldGrade = row["OldGrade"]?.ToString(),
+                        OldMarks = row["OldMarks"]?.ToString(),
+                        OldAcademicNo = row["OldAcademicNo"]?.ToString()
                     };
 
                     response.IsSuccess = true;
@@ -4103,9 +4121,13 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
             new SqlParameter("@IFCCode", request.IFCCode ?? string.Empty),
             new SqlParameter("@BPLStatus", (object?)request.BPLStatus ?? DBNull.Value),
             new SqlParameter("@SDisability", request.SDisability ?? string.Empty),
-             new SqlParameter("@Apaarid", request.Apaarid ?? string.Empty),
+            new SqlParameter("@Apaarid", request.Apaarid ?? string.Empty),
             new SqlParameter("@NameAsPerAadhaar", request.NameAsPerAadhaar ?? string.Empty),
             new SqlParameter("@SEmail", request.SEmail ?? string.Empty),
+            new SqlParameter("@BPLCategory", request.BPLCategory ?? string.Empty),
+            new SqlParameter("@CWSNStatus", request.CWSNStatus ?? (object)DBNull.Value),
+            new SqlParameter("@Category", request.Category ?? string.Empty),
+             new SqlParameter("@Remarks", request.Remarks ?? string.Empty),
             //new SqlParameter("@PhotoPath", studentPhotoPath ?? string.Empty),
             new SqlParameter("@UpdatedBy", updatedBy),
             new SqlParameter("@Endpoint", endpoint)
@@ -5663,6 +5685,144 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 return response;
             }
         }
+
+        public async Task<ResponseModel> GetStudentAuditByDateAsync(string date, string clientId)
+        {
+            var response = new ResponseModel
+            {
+                IsSuccess = true,
+                Status = 0,
+                Message = "No audit records found."
+            };
+
+            try
+            {
+                #region Get Connection String
+                var connectionStringHelper = new ConnectionStringHelper(_configuration);
+                string connectionString = connectionStringHelper.GetConnectionString(clientId);
+
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    response.IsSuccess = false;
+                    response.Status = -1;
+                    response.Message = "Invalid ClientId.";
+                    return response;
+                }
+                #endregion
+
+                #region SQL Query with INNER JOIN
+                var sqlQuery = @"
+        SELECT sa.*, sia.*
+        FROM Students_Audit sa
+        INNER JOIN StudentInfo_Audit sia ON sa.StudentID = sia.StudentId
+        WHERE CAST(sa.UpdatedOn AS DATE) = @AuditDate
+          AND CAST(sia.UpdatedOn AS DATE) = @AuditDate
+        ORDER BY sa.UpdatedOn DESC";
+                #endregion
+
+                #region Parameters
+                var parameters = new List<SqlParameter>
+        {
+            new SqlParameter("@AuditDate", SqlDbType.Date) { Value = date }
+        };
+                #endregion
+
+                #region Execute and Map
+                var auditList = new List<StudentDTO>();
+
+                using (var conn = new SqlConnection(connectionString))
+                using (var cmd = new SqlCommand(sqlQuery, conn))
+                {
+                    cmd.Parameters.AddRange(parameters.ToArray());
+                    await conn.OpenAsync();
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            string SafeDate(object dbValue) => dbValue == DBNull.Value ? null : Convert.ToDateTime(dbValue).ToString("yyyy-MM-dd");
+
+                            auditList.Add(new StudentDTO
+                            {
+                                // Students_Audit properties
+                                StudentID = reader["StudentID"]?.ToString(),
+                                AdmissionNo = reader["AdmissionNo"]?.ToString(),
+                                StudentName = reader["StudentName"]?.ToString(),
+                                DOB = SafeDate(reader["DOB"]),
+                                FatherName = reader["FathersName"]?.ToString(),
+                                MontherName = reader["MothersName"]?.ToString(),
+                                Gender = reader["Gender"]?.ToString(),
+                                MobileFather = reader["PhoneNo"]?.ToString(),
+                                PresentAddress = reader["PresentAddress"]?.ToString(),
+                                PermanentAddress = reader["PerminantAddress"]?.ToString(),
+                                Discharged = reader["Discharged"]?.ToString(),
+                                BloodGroup = reader["BloodGroup"]?.ToString(),
+                                SEmail = reader["SEmail"]?.ToString(),
+                                PinCode = reader["Pincode"]?.ToString(),
+                                Religion = reader["Religion"]?.ToString(),
+                                MotherTounge = reader["MotherTounge"]?.ToString(),
+                                BPLStatus = reader["BPLStatus"] != DBNull.Value ? Convert.ToInt32(reader["BPLStatus"]) : null,
+                                SDisability = reader["SDisability"]?.ToString(),
+                                BPLCategory = reader["BPLCategory"]?.ToString(),
+                                CWSNStatus = reader["CWSNStatus"] != DBNull.Value ? Convert.ToBoolean(reader["CWSNStatus"]) : null,
+                                HouseName = reader["HouseName"]?.ToString(),
+                                HID = reader["HID"]?.ToString(),
+                                AcademicNo = reader["APAARSTUDENTID"]?.ToString(),
+                                NameAsPerAadhaar = reader["NAMEASPERADHAAR"]?.ToString(),
+                                DOBASPERADHAAR = SafeDate(reader["DOBASPERADHAAR"]),
+                                FAdhaar = reader["Faadhaarcard"]?.ToString(),
+                                MAdhaar = reader["Maadhaarcard"]?.ToString(),
+                                OldSchoolName = reader["OldSchoolName"]?.ToString(),
+                                OldYear = reader["OldYear"]?.ToString(),
+                                OldLastDay = SafeDate(reader["OldLastDay"]),
+                                OldGrade = reader["OldGrade"]?.ToString(),
+                                OldMarks = reader["OldMarks"]?.ToString(),
+                                OldAcademicNo = reader["OldAcademicNo"]?.ToString(),
+
+                                // StudentInfo_Audit properties
+                                StudentInfoID = reader["StudentInfoID"]?.ToString(),
+                                Session = reader["Current_Session"]?.ToString(),
+                                ClassID = reader["ClassID"]?.ToString(),
+                                SectionID = reader["SectionID"]?.ToString(),
+                                RollNo = reader["RollNo"]?.ToString(),
+                                RouteID = reader["RouteID"]?.ToString(),
+                                busstopid = reader["BusStopID"]?.ToString(),
+                                Remarks = reader["Remarks"]?.ToString(),
+                                IsDischarged = reader["IsDischarged"]?.ToString(),
+                                BusFee = reader["BusFee"]?.ToString(),
+                                DDate = SafeDate(reader["WithdrawnOn"]),
+                                DBy = reader["WithdrawnBy"]?.ToString(),
+                                DSession = reader["DSession"]?.ToString(),
+                                DRemarks = reader["DRemarks"]?.ToString()
+                            });
+                        }
+                    }
+                }
+                #endregion
+
+                if (auditList.Count > 0)
+                {
+                    response.IsSuccess = true;
+                    response.Status = 1;
+                    response.Message = "Audit records fetched successfully.";
+                    response.ResponseData = auditList;
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                Student.Repository.Error.ErrorBLL.CreateErrorLog("StudentService", "GetStudentAuditByDateAsync", ex.ToString());
+                response.IsSuccess = false;
+                response.Status = -1;
+                response.Message = "Error occurred while fetching audit details.";
+                response.ResponseData = null;
+                response.Error = ex.Message;
+                return response;
+            }
+        }
+
+
 
     }
 }

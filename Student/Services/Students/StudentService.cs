@@ -3892,6 +3892,7 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
             new SqlParameter("@GuardialAccupation", request.GuardialAccupation ?? string.Empty),
             new SqlParameter("@GuardianPhoneNo", request.GuardianPhoneNo ?? string.Empty),
             new SqlParameter("@GuardianQualification", request.GuardianQualification ?? string.Empty),
+            new SqlParameter("@UpdatedBy", request.UpdatedBy ?? (object)DBNull.Value)
         };
                 #endregion
 
@@ -4000,6 +4001,7 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
     new SqlParameter("@PrStateID", request.PrStateID != null ? (object)request.PrStateID : DBNull.Value),
     new SqlParameter("@PrStateName", !string.IsNullOrWhiteSpace(request.PrStateName) ? (object)request.PrStateName : DBNull.Value),
     new SqlParameter("@Tehsil", !string.IsNullOrWhiteSpace(request.Tehsil) ? (object)request.Tehsil : DBNull.Value),
+     new SqlParameter("@UpdatedBy", request.UpdatedBy ?? (object)DBNull.Value),
     new SqlParameter("@TehsilPer", !string.IsNullOrWhiteSpace(request.TehsilPer) ? (object)request.TehsilPer : DBNull.Value)
         };
                 #endregion
@@ -5685,7 +5687,6 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 return response;
             }
         }
-
         public async Task<ResponseModel> GetStudentAuditByDateAsync(string date, string clientId)
         {
             var response = new ResponseModel
@@ -5710,92 +5711,144 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 }
                 #endregion
 
-                #region SQL Query with INNER JOIN
-                var sqlQuery = @"
-        SELECT sa.*, sia.*
-        FROM Students_Audit sa
-        INNER JOIN StudentInfo_Audit sia ON sa.StudentID = sia.StudentId
-        WHERE CAST(sa.UpdatedOn AS DATE) = @AuditDate
-          AND CAST(sia.UpdatedOn AS DATE) = @AuditDate
-        ORDER BY sa.UpdatedOn DESC";
+                #region Queries
+                string sqlStudentsAudit = @"
+SELECT 
+    StudentID, AdmissionNo, StudentName, DOB, FathersName, MothersName, Gender,
+    PhoneNo, PresentAddress, PerminantAddress, Discharged, PEN, Weight, Height,
+    BloodGroup, SEmail, Pincode, Religion, MotherTounge, BPLStatus, SDisability, 
+    BPLCategory, CWSNStatus, HouseName, HID, APAARSTUDENTID,
+    NAMEASPERADHAAR, DOBASPERADHAAR, Faadhaarcard, Maadhaarcard, 
+    OldSchoolName, OldYear, OldLastDay, OldGrade, OldMarks, OldAcademicNo,
+    UpdatedOn, UpdatedBy, Endpoint, Category
+FROM Students_Audit
+WHERE CAST(UpdatedOn AS DATE) = @AuditDate
+ORDER BY UpdatedOn DESC;
+";
+
+                string sqlStudentInfoAudit = @"
+SELECT 
+    StudentInfoID, StudentID, Current_Session, ClassID, SectionID, RollNo, RouteID,
+    BusStopID, Remarks, IsDischarged, BusFee, WithdrawnOn AS DDate, DSession,
+    UpdatedOn, UpdatedBy AS DBy, Endpoint AS DRemarks,
+    PrePrimaryBoardNo, PrePrimaryDate,
+    PrimaryBoardNo, PrimaryDate,
+    MiddleBoardNo, MiddleDate,
+    HighBoardNo, HighDate,
+    HigherBoardNo, HigherDate
+FROM StudentInfo_Audit
+WHERE CAST(UpdatedOn AS DATE) = @AuditDate
+ORDER BY UpdatedOn DESC;
+";
                 #endregion
 
-                #region Parameters
-                var parameters = new List<SqlParameter>
-        {
-            new SqlParameter("@AuditDate", SqlDbType.Date) { Value = date }
-        };
-                #endregion
-
-                #region Execute and Map
-                var auditList = new List<StudentDTO>();
-
-                using (var conn = new SqlConnection(connectionString))
-                using (var cmd = new SqlCommand(sqlQuery, conn))
+                #region Execute Queries with separate parameters
+                var studentsParameters = new SqlParameter[]
                 {
-                    cmd.Parameters.AddRange(parameters.ToArray());
-                    await conn.OpenAsync();
+            new SqlParameter("@AuditDate", SqlDbType.Date) { Value = Convert.ToDateTime(date) }
+                };
 
-                    using (var reader = await cmd.ExecuteReaderAsync())
+                var studentInfoParameters = new SqlParameter[]
+                {
+            new SqlParameter("@AuditDate", SqlDbType.Date) { Value = Convert.ToDateTime(date) }
+                };
+
+                var studentsDs = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, sqlStudentsAudit, studentsParameters);
+                var studentInfoDs = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, sqlStudentInfoAudit, studentInfoParameters);
+                #endregion
+
+                var auditList = new List<StudentDTO>();
+                string SafeDate(object dbValue) => dbValue == DBNull.Value ? null : Convert.ToDateTime(dbValue).ToString("yyyy-MM-dd");
+
+                #region Map Students_Audit
+                if (studentsDs != null && studentsDs.Tables.Count > 0)
+                {
+                    foreach (DataRow row in studentsDs.Tables[0].Rows)
                     {
-                        while (await reader.ReadAsync())
+                        auditList.Add(new StudentDTO
                         {
-                            string SafeDate(object dbValue) => dbValue == DBNull.Value ? null : Convert.ToDateTime(dbValue).ToString("yyyy-MM-dd");
+                            StudentID = row["StudentID"]?.ToString(),
+                            AdmissionNo = row["AdmissionNo"]?.ToString(),
+                            StudentName = row["StudentName"]?.ToString(),
+                            DOB = SafeDate(row["DOB"]),
+                            FatherName = row["FathersName"]?.ToString(),
+                            MontherName = row["MothersName"]?.ToString(),
+                            Gender = row["Gender"]?.ToString(),
+                            MobileFather = row["PhoneNo"]?.ToString(),
+                            PresentAddress = row["PresentAddress"]?.ToString(),
+                            PermanentAddress = row["PerminantAddress"]?.ToString(),
+                            Discharged = row["Discharged"]?.ToString(),
+                            PEN = row["PEN"]?.ToString(),
+                            WEIGHT = row["Weight"]?.ToString(),
+                            Height = row["Height"]?.ToString(),
+                            BloodGroup = row["BloodGroup"]?.ToString(),
+                            SEmail = row["SEmail"]?.ToString(),
+                            PinCode = row["Pincode"]?.ToString(),
+                            Religion = row["Religion"]?.ToString(),
+                            MotherTounge = row["MotherTounge"]?.ToString(),
+                            BPLStatus = row["BPLStatus"] != DBNull.Value ? Convert.ToInt32(row["BPLStatus"]) : (int?)null,
+                            SDisability = row["SDisability"]?.ToString(),
+                            BPLCategory = row["BPLCategory"]?.ToString(),
+                            CWSNStatus = row["CWSNStatus"] != DBNull.Value ? Convert.ToBoolean(row["CWSNStatus"]) : (bool?)null,
+                            HouseName = row["HouseName"]?.ToString(),
+                            HID = row["HID"]?.ToString(),
+                            AcademicNo = row["APAARSTUDENTID"]?.ToString(),
+                            NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
+                            DOBASPERADHAAR = SafeDate(row["DOBASPERADHAAR"]),
+                            FAdhaar = row["Faadhaarcard"]?.ToString(),
+                            MAdhaar = row["Maadhaarcard"]?.ToString(),
+                            OldSchoolName = row["OldSchoolName"]?.ToString(),
+                            OldYear = row["OldYear"]?.ToString(),
+                            OldLastDay = SafeDate(row["OldLastDay"]),
+                            OldGrade = row["OldGrade"]?.ToString(),
+                            OldMarks = row["OldMarks"]?.ToString(),
+                            OldAcademicNo = row["OldAcademicNo"]?.ToString(),
+                            UpdatedOn = row["UpdatedOn"]?.ToString(),
+                            DBy = row["UpdatedBy"]?.ToString(),
+                            DRemarks = row["Endpoint"]?.ToString(),
+                            Category = row["Category"]?.ToString(),
+                            SourceTable = "Students_Audit"
+                        });
+                    }
+                }
+                #endregion
 
-                            auditList.Add(new StudentDTO
-                            {
-                                // Students_Audit properties
-                                StudentID = reader["StudentID"]?.ToString(),
-                                AdmissionNo = reader["AdmissionNo"]?.ToString(),
-                                StudentName = reader["StudentName"]?.ToString(),
-                                DOB = SafeDate(reader["DOB"]),
-                                FatherName = reader["FathersName"]?.ToString(),
-                                MontherName = reader["MothersName"]?.ToString(),
-                                Gender = reader["Gender"]?.ToString(),
-                                MobileFather = reader["PhoneNo"]?.ToString(),
-                                PresentAddress = reader["PresentAddress"]?.ToString(),
-                                PermanentAddress = reader["PerminantAddress"]?.ToString(),
-                                Discharged = reader["Discharged"]?.ToString(),
-                                BloodGroup = reader["BloodGroup"]?.ToString(),
-                                SEmail = reader["SEmail"]?.ToString(),
-                                PinCode = reader["Pincode"]?.ToString(),
-                                Religion = reader["Religion"]?.ToString(),
-                                MotherTounge = reader["MotherTounge"]?.ToString(),
-                                BPLStatus = reader["BPLStatus"] != DBNull.Value ? Convert.ToInt32(reader["BPLStatus"]) : null,
-                                SDisability = reader["SDisability"]?.ToString(),
-                                BPLCategory = reader["BPLCategory"]?.ToString(),
-                                CWSNStatus = reader["CWSNStatus"] != DBNull.Value ? Convert.ToBoolean(reader["CWSNStatus"]) : null,
-                                HouseName = reader["HouseName"]?.ToString(),
-                                HID = reader["HID"]?.ToString(),
-                                AcademicNo = reader["APAARSTUDENTID"]?.ToString(),
-                                NameAsPerAadhaar = reader["NAMEASPERADHAAR"]?.ToString(),
-                                DOBASPERADHAAR = SafeDate(reader["DOBASPERADHAAR"]),
-                                FAdhaar = reader["Faadhaarcard"]?.ToString(),
-                                MAdhaar = reader["Maadhaarcard"]?.ToString(),
-                                OldSchoolName = reader["OldSchoolName"]?.ToString(),
-                                OldYear = reader["OldYear"]?.ToString(),
-                                OldLastDay = SafeDate(reader["OldLastDay"]),
-                                OldGrade = reader["OldGrade"]?.ToString(),
-                                OldMarks = reader["OldMarks"]?.ToString(),
-                                OldAcademicNo = reader["OldAcademicNo"]?.ToString(),
-
-                                // StudentInfo_Audit properties
-                                StudentInfoID = reader["StudentInfoID"]?.ToString(),
-                                Session = reader["Current_Session"]?.ToString(),
-                                ClassID = reader["ClassID"]?.ToString(),
-                                SectionID = reader["SectionID"]?.ToString(),
-                                RollNo = reader["RollNo"]?.ToString(),
-                                RouteID = reader["RouteID"]?.ToString(),
-                                busstopid = reader["BusStopID"]?.ToString(),
-                                Remarks = reader["Remarks"]?.ToString(),
-                                IsDischarged = reader["IsDischarged"]?.ToString(),
-                                BusFee = reader["BusFee"]?.ToString(),
-                                DDate = SafeDate(reader["WithdrawnOn"]),
-                                DBy = reader["WithdrawnBy"]?.ToString(),
-                                DSession = reader["DSession"]?.ToString(),
-                                DRemarks = reader["DRemarks"]?.ToString()
-                            });
-                        }
+                #region Map StudentInfo_Audit
+                if (studentInfoDs != null && studentInfoDs.Tables.Count > 0)
+                {
+                    foreach (DataRow row in studentInfoDs.Tables[0].Rows)
+                    {
+                        auditList.Add(new StudentDTO
+                        {
+                            StudentInfoID = row["StudentInfoID"]?.ToString(),
+                            StudentID = row["StudentID"]?.ToString(),
+                            Session = row["Current_Session"]?.ToString(),
+                            ClassID = row["ClassID"]?.ToString(),
+                            SectionID = row["SectionID"]?.ToString(),
+                            RollNo = row["RollNo"]?.ToString(),
+                            RouteID = row["RouteID"]?.ToString(),
+                            busstopid = row["BusStopID"]?.ToString(),
+                            Remarks = row["Remarks"]?.ToString(),
+                            IsDischarged = row["IsDischarged"]?.ToString(),
+                            BusFee = row["BusFee"]?.ToString(),
+                            DDate = SafeDate(row["DDate"]),
+                            DSession = row["DSession"]?.ToString(),
+                            DBy = row["DBy"]?.ToString(),
+                            DRemarks = row["DRemarks"]?.ToString(),
+                            UpdatedOn = row["UpdatedOn"]?.ToString(),
+                           // Category = row["Category"]?.ToString(),
+                            PrePrimaryBoardNo = row["PrePrimaryBoardNo"]?.ToString(),
+                            PrePrimaryDate = SafeDate(row["PrePrimaryDate"]),
+                            PrimaryBoardNo = row["PrimaryBoardNo"]?.ToString(),
+                            PrimaryDate = SafeDate(row["PrimaryDate"]),
+                            MiddleBoardNo = row["MiddleBoardNo"]?.ToString(),
+                            MiddleDate = SafeDate(row["MiddleDate"]),
+                            HighBoardNo = row["HighBoardNo"]?.ToString(),
+                            HighDate = SafeDate(row["HighDate"]),
+                            HigherBoardNo = row["HigherBoardNo"]?.ToString(),
+                            HigherDate = SafeDate(row["HigherDate"]),
+                            SourceTable = "StudentInfo_Audit"
+                        });
                     }
                 }
                 #endregion
@@ -5821,6 +5874,194 @@ WHERE AdmissionNo = @AdmissionNo AND StudentID <> @StudentID
                 return response;
             }
         }
+
+
+        //        public async Task<ResponseModel> GetStudentAuditByDateAsync(string date, string clientId)
+        //        {
+        //            var response = new ResponseModel
+        //            {
+        //                IsSuccess = true,
+        //                Status = 0,
+        //                Message = "No audit records found."
+        //            };
+
+        //            try
+        //            {
+        //                #region Get Connection String
+        //                var connectionStringHelper = new ConnectionStringHelper(_configuration);
+        //                string connectionString = connectionStringHelper.GetConnectionString(clientId);
+
+        //                if (string.IsNullOrEmpty(connectionString))
+        //                {
+        //                    response.IsSuccess = false;
+        //                    response.Status = -1;
+        //                    response.Message = "Invalid ClientId.";
+        //                    return response;
+        //                }
+        //                #endregion
+
+        //                #region Parameters
+        //                var parameters = new SqlParameter[]
+        //                {
+        //            new SqlParameter("@AuditDate", SqlDbType.Date) { Value = Convert.ToDateTime(date) }
+        //                };
+        //                #endregion
+
+        //                #region SQL Query
+        //                var sqlQuery = @"
+        //SELECT 
+        //    StudentID, AdmissionNo, StudentName, DOB, FathersName, MothersName, Gender,
+        //    PhoneNo, PresentAddress, PerminantAddress, Discharged, PEN, Weight, Height,
+        //    BloodGroup, SEmail, Pincode, Religion, MotherTounge, BPLStatus, SDisability, 
+        //    BPLCategory, CWSNStatus, HouseName, HID, APAARSTUDENTID,
+        //    NAMEASPERADHAAR, DOBASPERADHAAR, Faadhaarcard, Maadhaarcard, 
+        //    OldSchoolName, OldYear, OldLastDay, OldGrade, OldMarks, OldAcademicNo,
+        //    NULL AS StudentInfoID, NULL AS Current_Session, NULL AS ClassID, NULL AS SectionID, 
+        //    NULL AS RollNo, NULL AS RouteID, NULL AS BusStopID, 
+        //    NULL AS Remarks, NULL AS IsDischarged, NULL AS BusFee, NULL AS WithdrawnOn, 
+        //    NULL AS DSession, UpdatedOn, UpdatedBy, Endpoint,Category,NULL AS PrePrimaryBoardNo, NULL AS PrePrimaryDate,
+        //    NULL AS PrimaryBoardNo, NULL AS PrimaryDate,
+        //    NULL AS MiddleBoardNo, NULL AS MiddleDate,
+        //    NULL AS HighBoardNo, NULL AS HighDate,
+        //    NULL AS HigherBoardNo, NULL AS HigherDate,
+        //    'Students_Audit' AS SourceTable
+        //FROM Students_Audit
+        //WHERE CAST(UpdatedOn AS DATE) = @AuditDate
+
+        //UNION ALL
+
+        //SELECT
+        //    StudentID, NULL AS AdmissionNo, NULL AS StudentName, NULL AS DOB, 
+        //    NULL AS FathersName, NULL AS MothersName, NULL AS Gender,
+        //    NULL AS PhoneNo, NULL AS PresentAddress, NULL AS PerminantAddress, NULL AS Discharged, 
+        //    NULL AS PEN, NULL AS Weight, NULL AS Height,
+        //    NULL AS BloodGroup, NULL AS SEmail, NULL AS Pincode, NULL AS Religion, 
+        //    NULL AS MotherTounge, NULL AS BPLStatus, NULL AS SDisability, 
+        //    NULL AS BPLCategory, NULL AS CWSNStatus, NULL AS HouseName, NULL AS HID, NULL AS APAARSTUDENTID,
+        //    NULL AS NAMEASPERADHAAR, NULL AS DOBASPERADHAAR, NULL AS Faadhaarcard, NULL AS Maadhaarcard, 
+        //    NULL AS OldSchoolName, NULL AS OldYear, NULL AS OldLastDay, NULL AS OldGrade, 
+        //    NULL AS OldMarks, NULL AS OldAcademicNo,
+        //    StudentInfoID, Current_Session, ClassID, SectionID, 
+        //    RollNo, RouteID, BusStopID,
+        //    Remarks, IsDischarged, BusFee, WithdrawnOn, DSession, UpdatedOn, UpdatedBy, Endpoint,Category, PrePrimaryBoardNo, PrePrimaryDate,
+        //    PrimaryBoardNo, PrimaryDate,
+        //    MiddleBoardNo, MiddleDate,
+        //    HighBoardNo, HighDate,
+        //    HigherBoardNo, HigherDate,
+        //    'StudentInfo_Audit' AS SourceTable
+        //FROM StudentInfo_Audit
+        //WHERE CAST(UpdatedOn AS DATE) = @AuditDate
+
+        //ORDER BY UpdatedOn DESC";
+        //                #endregion
+
+        //                #region Execute Query
+        //                var ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, sqlQuery, parameters);
+
+        //                if (ds == null || ds.Tables.Count == 0)
+        //                    return response;
+
+        //                var dt = ds.Tables[0];
+        //                #endregion
+
+        //                #region Map to DTO
+        //                var auditList = new List<StudentDTO>();
+
+        //                string SafeDate(object dbValue) => dbValue == DBNull.Value ? null : Convert.ToDateTime(dbValue).ToString("yyyy-MM-dd");
+
+        //                foreach (DataRow row in dt.Rows)
+        //                {
+        //                    auditList.Add(new StudentDTO
+        //                    {
+        //                        // Students_Audit fields
+        //                        StudentID = row["StudentID"]?.ToString(),
+        //                        AdmissionNo = row["AdmissionNo"]?.ToString(),
+        //                        StudentName = row["StudentName"]?.ToString(),
+        //                        DOB = SafeDate(row["DOB"]),
+        //                        FatherName = row["FathersName"]?.ToString(),
+        //                        MontherName = row["MothersName"]?.ToString(),
+        //                        Gender = row["Gender"]?.ToString(),
+        //                        MobileFather = row["PhoneNo"]?.ToString(),
+        //                        PresentAddress = row["PresentAddress"]?.ToString(),
+        //                        PermanentAddress = row["PerminantAddress"]?.ToString(),
+        //                        Discharged = row["Discharged"]?.ToString(),
+        //                        BloodGroup = row["BloodGroup"]?.ToString(),
+        //                        SEmail = row["SEmail"]?.ToString(),
+        //                        PinCode = row["Pincode"]?.ToString(),
+        //                        Religion = row["Religion"]?.ToString(),
+        //                        MotherTounge = row["MotherTounge"]?.ToString(),
+        //                        BPLStatus = row["BPLStatus"] != DBNull.Value ? Convert.ToInt32(row["BPLStatus"]) : (int?)null,
+        //                        SDisability = row["SDisability"]?.ToString(),
+        //                        BPLCategory = row["BPLCategory"]?.ToString(),
+        //                        CWSNStatus = row["CWSNStatus"] != DBNull.Value ? Convert.ToBoolean(row["CWSNStatus"]) : (bool?)null,
+        //                        HouseName = row["HouseName"]?.ToString(),
+        //                        HID = row["HID"]?.ToString(),
+        //                        AcademicNo = row["APAARSTUDENTID"]?.ToString(),
+        //                        NameAsPerAadhaar = row["NAMEASPERADHAAR"]?.ToString(),
+        //                        DOBASPERADHAAR = SafeDate(row["DOBASPERADHAAR"]),
+        //                        FAdhaar = row["Faadhaarcard"]?.ToString(),
+        //                        MAdhaar = row["Maadhaarcard"]?.ToString(),
+        //                        OldSchoolName = row["OldSchoolName"]?.ToString(),
+        //                        OldYear = row["OldYear"]?.ToString(),
+        //                        OldLastDay = SafeDate(row["OldLastDay"]),
+        //                        OldGrade = row["OldGrade"]?.ToString(),
+        //                        OldMarks = row["OldMarks"]?.ToString(),
+        //                        OldAcademicNo = row["OldAcademicNo"]?.ToString(),
+        //                        Category = row["Category"]?.ToString(),
+        //                        // StudentInfo_Audit fields
+        //                        StudentInfoID = row["StudentInfoID"]?.ToString(),
+        //                        Session = row["Current_Session"]?.ToString(),
+        //                        ClassID = row["ClassID"]?.ToString(),
+        //                        SectionID = row["SectionID"]?.ToString(),
+        //                        RollNo = row["RollNo"]?.ToString(),
+        //                        RouteID = row["RouteID"]?.ToString(),
+        //                        busstopid = row["BusStopID"]?.ToString(),
+        //                        Remarks = row["Remarks"]?.ToString(),
+        //                        IsDischarged = row["IsDischarged"]?.ToString(),
+        //                        BusFee = row["BusFee"]?.ToString(),
+        //                        DDate = SafeDate(row["WithdrawnOn"]),
+        //                        DSession = row["DSession"]?.ToString(),
+        //                        DBy = row["UpdatedBy"]?.ToString(),
+        //                        DRemarks = row["Endpoint"]?.ToString(),
+        //                        PrePrimaryBoardNo = row["PrePrimaryBoardNo"]?.ToString(),
+        //                        PrePrimaryDate = SafeDate(row["PrePrimaryDate"]),
+        //                        PrimaryBoardNo = row["PrimaryBoardNo"]?.ToString(),
+        //                        PrimaryDate = SafeDate(row["PrimaryDate"]),
+        //                        MiddleBoardNo = row["MiddleBoardNo"]?.ToString(),
+        //                        MiddleDate = SafeDate(row["MiddleDate"]),
+        //                        HighBoardNo = row["HighBoardNo"]?.ToString(),
+        //                        HighDate = SafeDate(row["HighDate"]),
+        //                        HigherBoardNo = row["HigherBoardNo"]?.ToString(),
+        //                        UpdatedOn = row["UpdatedOn"]?.ToString(),
+
+        //                        SourceTable = row["SourceTable"]?.ToString()
+        //                    });
+        //                }
+        //                #endregion
+
+        //                if (auditList.Count > 0)
+        //                {
+        //                    response.IsSuccess = true;
+        //                    response.Status = 1;
+        //                    response.Message = "Audit records fetched successfully.";
+        //                    response.ResponseData = auditList;
+        //                }
+
+        //                return response;
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Student.Repository.Error.ErrorBLL.CreateErrorLog("StudentService", "GetStudentAuditByDateAsync", ex.ToString());
+        //                response.IsSuccess = false;
+        //                response.Status = -1;
+        //                response.Message = "Error occurred while fetching audit details.";
+        //                response.ResponseData = null;
+        //                response.Error = ex.Message;
+        //                return response;
+        //            }
+        //        }
+
+
 
 
 

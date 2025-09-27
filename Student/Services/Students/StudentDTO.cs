@@ -59,7 +59,7 @@
         public string BusStopName { get; set; }
         public string BusFee { get; set; }
 
-
+        public string SourceTable { get; set; }
         //public string UserName { get; set; }
         //public string UpdatedOn { get; set; }
         public string PrimaryBoardNo { get; set; }
@@ -130,8 +130,7 @@
         public string OldMarks { get; set; }
         public string OldAcademicNo { get; set; }
 
-
+        public string UpdatedOn { get; set; }
     }
-
 
 }

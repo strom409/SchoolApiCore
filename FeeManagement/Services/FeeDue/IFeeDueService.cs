@@ -1,0 +1,13 @@
+﻿using FeeManagement.Repository;
+
+namespace FeeManagement.Services.FeeDue
+{
+    public interface IFeeDueService
+    {
+        Task<ResponseModel> AddFeeDue(FeeDueDTO request, string clientId);
+        Task<ResponseModel> GetFeeDueByStudentName(string studentName, string clientId);
+        Task<ResponseModel> GetFeeDueByAdmissionNo(string admissionNo, string clientId);
+        Task<ResponseModel> GetFeeDueByClassId(long classId, string clientId);
+        Task<ResponseModel> DeleteFeeDue(long feeDueID, string clientId);
+    }
+}

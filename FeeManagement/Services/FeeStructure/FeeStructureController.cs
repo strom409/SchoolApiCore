@@ -22,8 +22,8 @@ namespace FeeManagement.Services.FeeStructure
 
             try
             {
-              //  var clientId = "client1";
-                   var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                var clientId = "client2";
+                 //  var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");
 
@@ -148,8 +148,8 @@ namespace FeeManagement.Services.FeeStructure
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
-               // var clientId = "client1";
+               var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+               // var clientId = "client2";
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing.");
 

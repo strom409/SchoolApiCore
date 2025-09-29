@@ -5,14 +5,19 @@ using System.Data;
 
 namespace FeeManagement.Services.FeeStructure
 {
-    public class FeeStructureService :IFeeStructureService
+    public class FeeStructureService : IFeeStructureService
     {
-         private readonly  IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         public FeeStructureService(IConfiguration configuration)
         {
-           _configuration = configuration;
+            _configuration = configuration;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> AddFeeStructure(FeeStructureDto dto, string clientId)
         {
             #region Initialize Response
@@ -42,7 +47,7 @@ namespace FeeManagement.Services.FeeStructure
                     new SqlParameter("@IsDeleted", false),
                     new SqlParameter("@Title", dto.Title ?? string.Empty),
                     new SqlParameter("@Remarks", dto.Remarks ?? string.Empty)
-            
+
                 };
                 #endregion
 
@@ -77,7 +82,12 @@ namespace FeeManagement.Services.FeeStructure
                 #endregion
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> UpdateFeeStructure(FeeStructureDto dto, string clientId)
         {
             #region Initialize Response
@@ -108,7 +118,7 @@ namespace FeeManagement.Services.FeeStructure
                     new SqlParameter("@UpdateBy", dto.UpdateBy ?? string.Empty),
                     new SqlParameter("@Title", dto.Title ?? string.Empty),
                     new SqlParameter("@Remarks", dto.Remarks ?? string.Empty),
-                    
+
                 };
                 #endregion
 
@@ -150,6 +160,11 @@ namespace FeeManagement.Services.FeeStructure
                 #endregion
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetAllFeeStructures(string clientId)
         {
             #region Initialize Response
@@ -192,8 +207,8 @@ namespace FeeManagement.Services.FeeStructure
                             Remarks = row.Field<string>("Remarks"),
                             SecIDFK = row.Field<long?>("SecIDFK"),
                             FeeCatID = row.Field<long?>("FeeCatID"),
-                            FeeSID = row.Field<long?>("FeeSID"),
-                            Rate = row.Field<decimal?>("Rate")
+                           // FeeSID = row.Field<long?>("FeeSID"),
+                           // Rate = row.Field<decimal?>("Rate")
                         });
                     }
                 }
@@ -219,6 +234,12 @@ namespace FeeManagement.Services.FeeStructure
                 #endregion
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fsId"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetFeeStructureById(long fsId, string clientId)
         {
             #region Initialize Response
@@ -286,6 +307,12 @@ namespace FeeManagement.Services.FeeStructure
                 #endregion
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cIDFK"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetFeeStructuresByClassId(long cIDFK, string clientId)
         {
             #region Initialize Response
@@ -353,12 +380,16 @@ namespace FeeManagement.Services.FeeStructure
                 #endregion
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fsId"></param>
+        /// <param name="updateBy"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> DeleteFeeStructure(long fsId, string updateBy, string clientId)
         {
-            #region Initialize Response
             var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "FeeStructure not deleted." };
-            #endregion
 
             try
             {
@@ -366,28 +397,24 @@ namespace FeeManagement.Services.FeeStructure
                 var connectionString = new ConnectionStringHelper(_configuration).GetConnectionString(clientId);
                 if (string.IsNullOrEmpty(connectionString))
                 {
-                    response.IsSuccess = false;
                     response.Message = "Invalid client ID.";
                     return response;
                 }
                 #endregion
 
-                #region Prepare Delete Parameters
+                #region Soft Delete Query
+                string query = @"
+        UPDATE FeeStructure 
+        SET IsDeleted = 1, 
+            UpdateOn = GETDATE(),
+            UpdateBy = @UpdateBy
+        WHERE FSID = @FSID AND IsDeleted = 0"; // only update if not already deleted
+
                 var sqlParams = new[]
                 {
-                    new SqlParameter("@FSID", fsId),
-                    new SqlParameter("@IsDeleted", true),
-                    new SqlParameter("@UpdateOn", DateTime.Now),
-                    new SqlParameter("@UpdateBy", updateBy ?? string.Empty)
-                };
-                #endregion
-
-                #region Execute Delete Query
-                string query = @"UPDATE FeeStructure SET 
-                                IsDeleted = @IsDeleted, 
-                                UpdateOn = @UpdateOn, 
-                                UpdateBy = @UpdateBy
-                                WHERE FSID = @FSID";
+            new SqlParameter("@FSID", fsId),
+            new SqlParameter("@UpdateBy", updateBy ?? string.Empty)
+        };
 
                 int result = await SQLHelperCore.ExecuteNonQueryAsync(connectionString, CommandType.Text, query, sqlParams);
 
@@ -395,7 +422,11 @@ namespace FeeManagement.Services.FeeStructure
                 {
                     response.IsSuccess = true;
                     response.Status = 1;
-                    response.Message = "FeeStructure deleted successfully.";
+                    response.Message = "FeeStructure deleted successfully (soft delete).";
+                }
+                else
+                {
+                    response.Message = "FeeStructure not found or already deleted.";
                 }
                 #endregion
 
@@ -409,11 +440,16 @@ namespace FeeManagement.Services.FeeStructure
                 response.Message = "Error deleting FeeStructure.";
                 response.Error = ex.Message;
 
-                Repository.Error.ErrorBLL.CreateErrorLog("FeeStructureService", "DeleteFeeStructure", ex.ToString());
+                Repository.Error.ErrorBLL.CreateErrorLog(
+                    "FeeStructureService", "DeleteFeeStructure",
+                    $"Error: {ex.Message} | StackTrace: {ex.StackTrace} | FSID: {fsId}"
+                );
+
                 return response;
                 #endregion
             }
         }
+
 
     }
 }

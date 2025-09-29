@@ -13,6 +13,12 @@ namespace FeeManagement.Services.FeeHead
         {
             _configuration = configuration;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> AddFeeHead(FeeHeadDto request, string clientId)
         {
             #region Initialize Response
@@ -95,7 +101,12 @@ namespace FeeManagement.Services.FeeHead
                 #endregion
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> UpdateFeeHead(FeeHeadDto request, string clientId)
         {
             #region Initialize Response
@@ -196,7 +207,12 @@ namespace FeeManagement.Services.FeeHead
                 #endregion
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fHID"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetFeeHeadById(long fHID, string clientId)
         {
             #region Initialize Response
@@ -261,7 +277,12 @@ namespace FeeManagement.Services.FeeHead
                 #endregion
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fHType"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetFeeHeadsByType(int fHType, string clientId)
         {
             #region Initialize Response
@@ -325,7 +346,11 @@ namespace FeeManagement.Services.FeeHead
                 #endregion
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetAllFeeHeads(string clientId)
         {
             #region Initialize Response
@@ -390,7 +415,12 @@ namespace FeeManagement.Services.FeeHead
                 #endregion
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fHID"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> DeleteFeeHead(long fHID, string clientId)
         {
             #region Initialize Response
@@ -454,8 +484,5 @@ namespace FeeManagement.Services.FeeHead
                 #endregion
             }
         }
-
-
-
     }
 }

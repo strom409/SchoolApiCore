@@ -22,6 +22,7 @@ namespace FeeManagement.Services.FeeDue
 
             try
             {
+               // var clientId = "client2";
                 var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");
@@ -60,7 +61,8 @@ namespace FeeManagement.Services.FeeDue
 
             try
             {
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                var clientId = "client2";
+                 // var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");
 
@@ -77,12 +79,7 @@ namespace FeeManagement.Services.FeeDue
                         break;
 
                     case 1: // Get FeeDue by Admission No
-                        if (string.IsNullOrEmpty(param))
-                        {
-                            response.IsSuccess = false;
-                            response.Message = "AdmissionNo parameter missing.";
-                            return BadRequest(response);
-                        }
+                  
                         response = await _feeDueService.GetFeeDueByAdmissionNo(param, clientId);
                         break;
 
@@ -94,6 +91,9 @@ namespace FeeManagement.Services.FeeDue
                             return BadRequest(response);
                         }
                         response = await _feeDueService.GetFeeDueByClassId(classId, clientId);
+                        break;
+                    case 3: // Get All Months
+                        response = await _feeDueService.GetAllMonths(clientId);
                         break;
 
                     default:
@@ -113,6 +113,44 @@ namespace FeeManagement.Services.FeeDue
 
             return Ok(response);
         }
+        [HttpPut("update")]
+        public async Task<ActionResult<ResponseModel>> Update([FromQuery] int actionType, [FromBody] object request)
+        {
+            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "Issue at Controller Level!" };
+
+            try
+            {
+              //  var clientId = "client2";
+                 var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientId))
+                    return BadRequest("ClientId header missing");
+
+              
+                switch (actionType)
+                {
+                    case 0: // Update single FeeDue
+                        var feeDto = JsonConvert.DeserializeObject<FeeDueDTO>(request.ToString());
+                        response = await _feeDueService.UpdateFeeDue(feeDto, clientId);
+                        break;
+
+                    // You can add more cases for different update types here
+                    default:
+                        response.IsSuccess = false;
+                        response.Message = "Invalid actionType.";
+                        return BadRequest(response);
+                }
+            }
+            catch (Exception ex)
+            {
+                Repository.Error.ErrorBLL.CreateErrorLog("FeeDueController", "Update", ex.ToString());
+                response.IsSuccess = false;
+                response.Status = -1;
+                response.Message = "Error updating FeeDue.";
+                response.Error = ex.Message;
+            }
+
+            return Ok(response);
+        }
 
         [HttpDelete("delete")]
         public async Task<ActionResult<ResponseModel>> Delete([FromQuery] int actionType, [FromQuery] long feeDueID)
@@ -121,6 +159,7 @@ namespace FeeManagement.Services.FeeDue
 
             try
             {
+              //  var clientId = "client2";
                 var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");

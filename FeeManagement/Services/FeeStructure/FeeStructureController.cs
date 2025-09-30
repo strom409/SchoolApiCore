@@ -22,8 +22,8 @@ namespace FeeManagement.Services.FeeStructure
 
             try
             {
-                var clientId = "client2";
-                 //  var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                //var clientId = "client2";
+                   var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");
 
@@ -56,8 +56,8 @@ namespace FeeManagement.Services.FeeStructure
         public async Task<ActionResult<ResponseModel>> Fetch([FromQuery] int actionType, [FromQuery] string? param)
         {
             var response = new ResponseModel { IsSuccess = true, Status = 0 };
-            //var clientId = "client1";
-            var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+            var clientId = "client2";
+           // var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
             if (string.IsNullOrEmpty(clientId))
                 return BadRequest("ClientId header missing");
 
@@ -66,7 +66,10 @@ namespace FeeManagement.Services.FeeStructure
                 switch (actionType)
                 {
                     case 0: // Get All FeeStructures
-                        response = await _feeStructureService.GetAllFeeStructures(clientId);
+                        var currentsession = param; // param from query is already string
+                        if (string.IsNullOrEmpty(currentsession))
+                            return BadRequest("CurrentSession is required.");
+                        response = await _feeStructureService.GetAllFeeStructures(clientId, currentsession);
                         break;
 
                     case 1: // Get FeeStructure By ID
@@ -85,6 +88,27 @@ namespace FeeManagement.Services.FeeStructure
                         }
 
                         response = await _feeStructureService.GetFeeStructuresByClassId(cIdFk, clientId);
+                        break;
+
+                    case 3: // Get FeeStructure By ClassID & FHIDFK
+                        if (string.IsNullOrEmpty(param))
+                        {
+                            response.IsSuccess = false;
+                            response.Message = "Parameter (ClassID,FHIDFK) is required.";
+                            return BadRequest(response);
+                        }
+
+                        var parts = param.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length < 2
+                            || !long.TryParse(parts[0].Trim(), out long classId)
+                            || !long.TryParse(parts[1].Trim(), out long fhId))
+                        {
+                            response.IsSuccess = false;
+                            response.Message = "Invalid parameter format. Use ClassID,FHIDFK.";
+                            return BadRequest(response);
+                        }
+
+                        response = await _feeStructureService.GetFeeStructureByClassAndFeeHead(classId, fhId, clientId);
                         break;
                     default:
                         return BadRequest(response);

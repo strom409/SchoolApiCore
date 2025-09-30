@@ -1,4 +1,5 @@
 using FeeManagement.Repository.Error;
+using FeeManagement.Services.FeeDue;
 using FeeManagement.Services.FeeHead;
 using FeeManagement.Services.FeeStructure;
 using Microsoft.Extensions.FileProviders;
@@ -15,6 +16,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IFeeHeadService, FeeHeadService>();
 builder.Services.AddScoped<IFeeStructureService, FeeStructureService>();
+builder.Services.AddScoped<IFeeDueService, FeeDueService>();
 
 // ? Register ErrorBLL itself so it can be resolved
 builder.Services.AddScoped<ErrorBLL>();

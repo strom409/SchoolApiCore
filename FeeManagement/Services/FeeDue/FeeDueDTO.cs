@@ -11,10 +11,10 @@
         public int? DidFk { get; set; }
         public long? FsIdFk { get; set; }
         public int? FCategoryId { get; set; }
-        public int? FeelHeadType { get; set; }
-        public string? FeelHeadName { get; set; }
+        public int? FeeHeadType { get; set; }
+        public string? FeeHeadName { get; set; }
         public string? CurrentSession { get; set; }
-        public string? FeelMonth { get; set; }
+        public string? FeeMonth { get; set; }
         public int? FeelMonthIdFk { get; set; }
         public string? FeeYear { get; set; }
         public string? SystemYear { get; set; }

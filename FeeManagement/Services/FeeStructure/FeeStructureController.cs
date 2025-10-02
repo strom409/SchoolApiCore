@@ -180,7 +180,7 @@ namespace FeeManagement.Services.FeeStructure
                 switch (actionType)
                 {
                     case 0: // Delete FeeStructure
-                        response = await _feeStructureService.DeleteFeeStructure(id, "System", clientId); // pass UpdatedBy from header/body if needed
+                        response = await _feeStructureService.DeleteFeeStructure(id, clientId); // pass UpdatedBy from header/body if needed
                         break;
 
                     default:

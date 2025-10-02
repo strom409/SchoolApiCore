@@ -1,17 +1,19 @@
-﻿using FeeManagement.Repository;
+﻿using Azure.Core;
+using FeeManagement.Repository;
 using FeeManagement.Repository.SQL;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FeeManagement.Services.FeeDue
 {
-    public class FeeDueService :IFeeDueService
+    public class FeeDueService : IFeeDueService
     {
         private readonly IConfiguration _configuration;
         public FeeDueService(IConfiguration configuration)
         {
-            _configuration= configuration;
+            _configuration = configuration;
         }
         /// <summary>
         /// 
@@ -32,6 +34,16 @@ namespace FeeManagement.Services.FeeDue
                     response.IsSuccess = false;
                     response.Message = "Invalid client ID.";
                     return response;
+                }
+                #endregion
+                #region Get Last FeeDueID
+                string lastIdQuery = "SELECT ISNULL(MAX(FeeDueID), 0) AS LastID FROM FeeDue";
+                DataSet dsLastId = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, lastIdQuery, null);
+
+                long newFeeDueID = 1; // default if table empty
+                if (dsLastId != null && dsLastId.Tables.Count > 0 && dsLastId.Tables[0].Rows.Count > 0)
+                {
+                    newFeeDueID = Convert.ToInt64(dsLastId.Tables[0].Rows[0]["LastID"]) + 1;
                 }
                 #endregion
 
@@ -66,9 +78,10 @@ namespace FeeManagement.Services.FeeDue
                 dt.Columns.Add("ToPay", typeof(decimal));
                 dt.Columns.Add("IsDeleted", typeof(int));
                 dt.Columns.Add("Remarks", typeof(string));
-
+                dt.Columns.Add("IsFlat", typeof(int));
+                dt.Columns.Add("Percentage", typeof(decimal));
                 dt.Rows.Add(
-                    request.FeeDueID,
+                    newFeeDueID,
                     request.ClassIDFK,
                     request.SectionIDFK,
                     request.StudentIdFk,
@@ -77,10 +90,10 @@ namespace FeeManagement.Services.FeeDue
                     request.DidFk ?? (object)DBNull.Value,
                     request.FsIdFk ?? (object)DBNull.Value,
                     request.FCategoryId ?? (object)DBNull.Value,
-                    request.FeelHeadType ?? (object)DBNull.Value,
-                    request.FeelHeadName ?? string.Empty,
+                    request.FeeHeadType ?? (object)DBNull.Value,
+                    request.FeeHeadName ?? string.Empty,
                     request.CurrentSession ?? string.Empty,
-                    request.FeelMonth ?? string.Empty,
+                    request.FeeMonth ?? string.Empty,
                     request.FeelMonthIdFk ?? (object)DBNull.Value,
                     request.FeeYear ?? string.Empty,
                     request.SystemYear ?? string.Empty,
@@ -96,7 +109,9 @@ namespace FeeManagement.Services.FeeDue
                     request.LateFee ?? 0,
                     request.ToPay ?? 0,
                     0,
-                    request.Remarks ?? string.Empty
+                    request.Remarks ?? string.Empty,
+                    request.IsFlat ?? 0,          // <-- Added IsFlat
+                    request.Percentage ?? 0
                 );
                 #endregion
 
@@ -234,16 +249,16 @@ namespace FeeManagement.Services.FeeDue
                         SectionIDFK = row.Field<long>("SectionIDFK"),
                         StudentIdFk = row.Field<long>("StudentIDFK"),
                         StudentInfoIdFk = row.Field<long>("StudentInfoIDFK"),
-                      //  st = row.Field<string>("StudentName"),
-                       // AdmissionNo = row.Field<string>("AdmissionNo"),
+                        //  st = row.Field<string>("StudentName"),
+                        // AdmissionNo = row.Field<string>("AdmissionNo"),
                         FhIdFk = row.Field<int?>("FHIDFK"),
                         DidFk = row.Field<int?>("DIDFK"),
                         FsIdFk = row.Field<long?>("FSIDFK"),
                         FCategoryId = row.Field<int?>("FCategoryID"),
-                        FeelHeadType = row.Field<int?>("FeeHeadType"),
-                        FeelHeadName = row.Field<string>("FeeHeadName"),
+                        FeeHeadType = row.Field<int?>("FeeHeadType"),
+                        FeeHeadName = row.Field<string>("FeeHeadName"),
                         CurrentSession = row.Field<string>("Current_Session"),
-                        FeelMonth = row.Field<string>("FeeMonth"),
+                        FeeMonth = row.Field<string>("FeeMonth"),
                         FeelMonthIdFk = row.Field<int?>("FeeMonthIDFK"),
                         FeeYear = row.Field<string>("FeeYear"),
                         SystemYear = row.Field<string>("SystemYear"),
@@ -376,7 +391,7 @@ namespace FeeManagement.Services.FeeDue
             fd.LateFee,
             fd.ToPay,
             fd.IsPaid,
-            fd.Remarks
+            fd.R%emarks
         FROM FeeDue fd
         INNER JOIN StudentInfo si ON fd.StudentInfoIDFK = si.StudentInfoID
         INNER JOIN Students s ON fd.StudentIDFK = s.StudentID
@@ -405,10 +420,10 @@ namespace FeeManagement.Services.FeeDue
                         StudentInfoIdFk = row.Field<long>("StudentInfoIDFK"),
                         FhIdFk = row.Field<int?>("FHIDFK"),
                         FCategoryId = row.Field<int?>("FCategoryID"),
-                        FeelHeadType = row.Field<int?>("FeeHeadType"),
-                        FeelHeadName = row.Field<string>("FeeHeadName"),
+                        FeeHeadType = row.Field<int?>("FeeHeadType"),
+                        FeeHeadName = row.Field<string>("FeeHeadName"),
                         CurrentSession = row.Field<string>("Current_Session"),
-                        FeelMonth = row.Field<string>("FeeMonth"),
+                        FeeMonth = row.Field<string>("FeeMonth"),
                         FeelMonthIdFk = row.Field<int?>("FeeMonthIDFK"),
                         FeeYear = row.Field<string>("FeeYear"),
                         DueDate = row.Field<DateTime?>("DueDate"),
@@ -445,8 +460,6 @@ namespace FeeManagement.Services.FeeDue
                 return response;
             }
         }
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -553,10 +566,10 @@ namespace FeeManagement.Services.FeeDue
                         DidFk = row.Field<int?>("DIDFK"),
                         FsIdFk = row.Field<long?>("FSIDFK"),
                         FCategoryId = row.Field<int?>("FCategoryID"),
-                        FeelHeadType = row.Field<int?>("FeeHeadType"),
-                        FeelHeadName = row.Field<string>("FeeHeadName"),
+                        FeeHeadType = row.Field<int?>("FeeHeadType"),
+                        FeeHeadName = row.Field<string>("FeeHeadName"),
                         CurrentSession = row.Field<string>("Current_Session"),
-                        FeelMonth = row.Field<string>("FeeMonth"),
+                        FeeMonth = row.Field<string>("FeeMonth"),
                         FeelMonthIdFk = row.Field<int?>("FeeMonthIDFK"),
                         FeeYear = row.Field<string>("FeeYear"),
                         SystemYear = row.Field<string>("SystemYear"),
@@ -624,7 +637,7 @@ namespace FeeManagement.Services.FeeDue
 
             try
             {
-                // Get connection string for client
+                #region Get Connection String
                 var connectionString = new ConnectionStringHelper(_configuration).GetConnectionString(clientId);
                 if (string.IsNullOrEmpty(connectionString))
                 {
@@ -632,18 +645,25 @@ namespace FeeManagement.Services.FeeDue
                     response.Message = "Invalid client ID.";
                     return response;
                 }
+                #endregion
 
-                // Query
-                string query = "SELECT MonthID, [Month] FROM Months";
+                #region Query
+                string query = @"SELECT SMID, MonthName, MonthNo, ShortName, SortOrder 
+                         FROM SessionMonths 
+                         ORDER BY SortOrder";
+                #endregion
 
+                #region Execute
                 DataSet ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, query, null);
-
                 if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
                 {
-                    var months = ds.Tables[0].AsEnumerable().Select(row => new MonthDTO
+                    var months = ds.Tables[0].AsEnumerable().Select(row => new SessionMonthDTO
                     {
-                        MonthID = row.Field<int>("MonthID"),
-                        Month = row.Field<string>("Month")
+                        SMID = row.Field<long>("SMID"),
+                        MonthName = row.Field<string>("MonthName"),
+                        MonthNo = row.Field<int>("MonthNo"),
+                        ShortName = row.Field<string>("ShortName"),
+                        SortOrder = row.Field<int>("SortOrder")
                     }).ToList();
 
                     response.IsSuccess = true;
@@ -651,6 +671,7 @@ namespace FeeManagement.Services.FeeDue
                     response.Message = "Records retrieved successfully.";
                     response.ResponseData = months;
                 }
+                #endregion
 
                 return response;
             }
@@ -665,6 +686,7 @@ namespace FeeManagement.Services.FeeDue
                 return response;
             }
         }
+
 
         /// <summary>
         /// 
@@ -736,6 +758,121 @@ namespace FeeManagement.Services.FeeDue
             return response;
         }
 
+
+
+        public async Task<ResponseModel> GetFeeDueBySectionId(long sectionId, int feeHeadId, string clientId)
+        {
+            var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "No records found" };
+
+            try
+            {
+                #region Get Connection String
+                var connectionString = new ConnectionStringHelper(_configuration).GetConnectionString(clientId);
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Invalid Client Id";
+                    return response;
+                }
+                #endregion
+
+                #region SQL Query
+                string query = @"
+                SELECT DISTINCT
+                    fd.FeeDueID,
+                    fd.SectionIDFK,
+                    s.SectionName,
+                    fd.ClassIDFK,
+                    c.ClassName,
+                    fd.StudentIDFK,
+                    st.StudentName,
+                    fd.StudentInfoIDFK,
+                    fd.FHIDFK,
+                    fh.FHName AS FeeHeadName,
+                    fd.FSIDFK,
+                    fs.Title AS FeeStructureName,
+                    fd.FCategoryID,
+                    fd.FeeHeadType,
+                    fd.Current_Session,
+                    fd.FeeMonth,
+                    fd.FeeYear,
+                    fd.SystemYear,
+                    fd.SystemMonth,
+                    fd.DueDate,
+                    fd.BillDate,
+                    fd.ToPay,
+                    fd.IsPaid,
+                    fd.Remarks
+                FROM dbo.Students st
+                INNER JOIN dbo.StudentInfo si ON st.StudentID = si.StudentId
+                INNER JOIN dbo.Classes c ON si.ClassID = c.ClassID
+                INNER JOIN dbo.Sections s ON si.SectionID = s.SectionID
+                LEFT JOIN dbo.Feeheads fh ON fh.FHID = @FeeHeadId
+                LEFT JOIN dbo.FeeStructure fs ON fh.FHID = fs.FHIDFK AND fs.CIDFK = si.ClassId
+                LEFT JOIN dbo.FeeDue fd ON si.StudentInfoID = fd.StudentInfoIDFK
+                WHERE si.SectionID = @SectionId  
+                  AND fh.FHID = @FeeHeadId
+                  AND fs.IsDeleted = 0 
+                  AND fd.IsPaid = 0";
+                #endregion
+
+                #region Parameters
+                SqlParameter[] parameters = {
+                new SqlParameter("@SectionId", sectionId),
+                new SqlParameter("@FeeHeadId", feeHeadId)
+            };
+                #endregion
+
+                #region Execute
+                var ds = await SQLHelperCore.ExecuteDatasetAsync(connectionString, CommandType.Text, query, parameters);
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    var data = ds.Tables[0].AsEnumerable().Select(row => new FeeDueDetailsDto
+                    {
+                        FeeDueID = row.Field<long>("FeeDueID"),
+                        SectionIDFK = row.Field<long>("SectionIDFK"),
+                        SectionName = row.Field<string>("SectionName"),
+                        ClassIDFK = row.Field<long>("ClassIDFK"),
+                        ClassName = row.Field<string>("ClassName"),
+                        StudentIDFK = row.Field<long>("StudentIDFK"),
+                        StudentName = row.Field<string>("StudentName"),
+                        StudentInfoIDFK = row.Field<long>("StudentInfoIDFK"),
+                        FHIDFK = row.Field<int>("FHIDFK"),
+                        FeeHeadName = row.Field<string>("FeeHeadName"),
+                        FSIDFK = row.Field<long>("FSIDFK"),
+                        FeeStructureName = row.Field<string>("FeeStructureName"),
+                        FCategoryID = row.Field<int>("FCategoryID"),
+                        FeeHeadType = row.Field<int>("FeeHeadType"),
+                        Current_Session = row.Field<string>("Current_Session"),
+                        FeeMonth = row.Field<string>("FeeMonth"),
+                        FeeYear = row.Field<string>("FeeYear"),
+                        SystemYear = row.Field<string>("SystemYear"),
+                        SystemMonth = row.Field<string>("SystemMonth"),
+                        DueDate = row.Field<DateTime?>("DueDate"),
+                        BillDate = row.Field<DateTime?>("BillDate"),
+                        ToPay = row.Field<decimal>("ToPay"),
+                        IsPaid = row.Field<int>("IsPaid"),
+                        Remarks = row.Field<string>("Remarks")
+                    }).ToList();
+
+                    response.IsSuccess = true;
+                    response.Status = 1;
+                    response.Message = "Data fetched successfully";
+                    response.ResponseData = data;
+                }
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = "Error while fetching FeeDue records";
+                response.Error = ex.Message;
+                Repository.Error.ErrorBLL.CreateErrorLog("FeeStructureService", "AddFeeStructure", ex.ToString());
+
+            }
+
+            return response;
+        }
         /// <summary>
         /// 
         /// </summary>

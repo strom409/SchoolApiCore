@@ -10,7 +10,7 @@ namespace FeeManagement.Services.FeeStructure
         //  Task<ResponseModel> GetAllFeeStructures(string clientId);
         Task<ResponseModel> GetAllFeeStructures(string clientId, string currentSession);
         Task<ResponseModel> GetFeeStructureById(long fsId, string clientId);
-        Task<ResponseModel> DeleteFeeStructure(long fsId, string updateBy, string clientId);
+        Task<ResponseModel> DeleteFeeStructure(long fsId, string clientId);
         Task<ResponseModel> GetFeeStructuresByClassId(long cIDFK, string clientId);
     }
 }

@@ -104,6 +104,7 @@ namespace FeeManagement.Services.FeeStructure
                 #endregion
             }
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -182,6 +183,7 @@ namespace FeeManagement.Services.FeeStructure
                 #endregion
             }
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -406,7 +408,13 @@ namespace FeeManagement.Services.FeeStructure
                 #endregion
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="classId"></param>
+        /// <param name="fhId"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         public async Task<ResponseModel> GetFeeStructureByClassAndFeeHead(long classId, long fhId, string clientId)
         {
             #region Initialize Response
@@ -569,7 +577,7 @@ namespace FeeManagement.Services.FeeStructure
         /// <param name="updateBy"></param>
         /// <param name="clientId"></param>
         /// <returns></returns>
-        public async Task<ResponseModel> DeleteFeeStructure(long fsId, string updateBy, string clientId)
+        public async Task<ResponseModel> DeleteFeeStructure(long fsId, string clientId)
         {
             var response = new ResponseModel { IsSuccess = true, Status = 0, Message = "FeeStructure not deleted." };
 
@@ -586,16 +594,14 @@ namespace FeeManagement.Services.FeeStructure
 
                 #region Soft Delete Query
                 string query = @"
-        UPDATE FeeStructure 
-        SET IsDeleted = 1, 
-            UpdateOn = GETDATE(),
-            UpdateBy = @UpdateBy
-        WHERE FSID = @FSID AND IsDeleted = 0"; // only update if not already deleted
+            UPDATE FeeStructure 
+            SET IsDeleted = 1, 
+                UpdateOn = GETDATE()
+            WHERE FSID = @FSID AND IsDeleted = 0"; // only update if not already deleted
 
                 var sqlParams = new[]
                 {
-            new SqlParameter("@FSID", fsId),
-            new SqlParameter("@UpdateBy", updateBy ?? string.Empty)
+            new SqlParameter("@FSID", fsId)
         };
 
                 int result = await SQLHelperCore.ExecuteNonQueryAsync(connectionString, CommandType.Text, query, sqlParams);
@@ -631,6 +637,7 @@ namespace FeeManagement.Services.FeeStructure
                 #endregion
             }
         }
+
 
 
     }

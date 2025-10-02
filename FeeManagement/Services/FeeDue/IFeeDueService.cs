@@ -11,5 +11,6 @@ namespace FeeManagement.Services.FeeDue
         Task<ResponseModel> UpdateFeeDue(FeeDueDTO request, string clientId);
         Task<ResponseModel> GetAllMonths(string clientId);
         Task<ResponseModel> DeleteFeeDue(long feeDueID, string clientId);
+        Task<ResponseModel> GetFeeDueBySectionId(long sectionId, int feeHeadId, string clientId);
     }
 }

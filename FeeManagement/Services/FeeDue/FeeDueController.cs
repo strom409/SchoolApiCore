@@ -22,8 +22,8 @@ namespace FeeManagement.Services.FeeDue
 
             try
             {
-               // var clientId = "client2";
-                var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
+                var clientId = "client2";
+               // var clientId = Request.Headers["X-Client-Id"].FirstOrDefault();
                 if (string.IsNullOrEmpty(clientId))
                     return BadRequest("ClientId header missing");
 
@@ -94,6 +94,26 @@ namespace FeeManagement.Services.FeeDue
                         break;
                     case 3: // Get All Months
                         response = await _feeDueService.GetAllMonths(clientId);
+                        break;
+                    case 4: // Get feedue By sectionId & feeHeadId
+                        if (string.IsNullOrEmpty(param))
+                        {
+                            response.IsSuccess = false;
+                            response.Message = "Parameter (sectionId,feeHeadId) is required.";
+                            return BadRequest(response);
+                        }
+
+                        var parts = param.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length < 2
+                            || !long.TryParse(parts[0].Trim(), out long sectionId)
+                            || !int.TryParse(parts[1].Trim(), out int feeHeadId))
+                        {
+                            response.IsSuccess = false;
+                            response.Message = "Invalid parameter format. Use ClassID,FHIDFK.";
+                            return BadRequest(response);
+                        }
+
+                        response = await _feeDueService.GetFeeDueBySectionId(sectionId, feeHeadId, clientId);
                         break;
 
                     default:

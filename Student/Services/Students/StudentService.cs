@@ -1878,6 +1878,7 @@ WHERE s.PhoneNo = @PhoneNo";
         /// </summary>
         /// <param name="currentSession"></param>
         /// <returns></returns>
+        
         public async Task<ResponseModel> GetStudentsByCurrentSession(string currentSession, string clientId)
         {
             #region Initialize Response and Validate Connection String
